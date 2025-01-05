@@ -1,0 +1,44 @@
+h1 {
+  margin-bottom: 1em;
+}
+
+.file-selection {
+  margin-bottom: 1.5em;
+}
+
+.file-selection label {
+  display: block;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.file-selection select {
+  width: 100%;
+  padding: 0.8em;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  color: #000;
+}
+
+.export-button {
+  padding: 0.8em 1.5em;
+  font-size: 1em;
+  border: none;
+  border-radius: 0.5em;
+  background-color: #0070f3;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.export-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  border: 1px solid #000;
+  color: #000;
+}
+
+.export-button:hover:not(:disabled) {
+  background-color: #005bb5;
+}

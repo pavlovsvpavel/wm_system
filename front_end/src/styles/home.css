@@ -1,0 +1,47 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2em;
+  padding: 1em;
+  margin-top: 5em;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+p {
+  font-size: 1.2em;
+}
+
+.button-group {
+  display: flex;
+  gap: 1em;
+  width: 100%;
+  justify-content: space-evenly; /* Spread out buttons evenly */
+}
+
+.button {
+  padding: 0.8em 1.5em;
+  font-size: 1em;
+  border: none;
+  border-radius: 0.5em;
+  background-color: #0070f3;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 150px;
+
+}
+
+.button:hover {
+  background-color: #005bb5;
+}
+
+.content img {
+  width: 100px;
+  height: 100px;
+}
