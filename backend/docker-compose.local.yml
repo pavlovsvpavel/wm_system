@@ -1,0 +1,46 @@
+services:
+#  web:
+#    container_name: house_manager_app_web_local
+#    image: house_manager:local
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      args:
+#        DOCKER_BUILDKIT: 1
+#    restart: always
+#    ports:
+#      - "8000:8000"
+#    env_file:
+#      - ./envs/.env.local
+#    volumes:
+#      - ./staticfiles:/tmp/house_manager/static_files
+#      - ./mediafiles:/tmp/house_manager/mediafiles
+#      - ./locale:/tmp/house_manager/locale
+#    platform: linux/amd64
+#    command: gunicorn house_manager.wsgi:application --bind=0.0.0.0:8000
+#    depends_on:
+#      - postgres
+  postgres:
+    container_name: warehouse_app_postgres
+    image: postgres:17
+#    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./envs/.env.local
+    volumes:
+      - ./postgres_db:/var/lib/postgresql/data
+#  nginx:
+#    container_name: house_manager_app_nginx
+#    image: nginx
+#    restart: always
+#    ports:
+#      - "127.0.0.1:81:80"
+#    volumes:
+#      - ./staticfiles:/home/app/web/static_files
+#      - ./mediafiles:/home/app/web/mediafiles
+#      - ./locale:/home/app/web/locale
+#      - ./nginx/local/conf.d:/etc/nginx/conf.d
+#      - ./nginx/local/logs:/var/log/nginx
+#    depends_on:
+#      - web
