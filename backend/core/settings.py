@@ -44,6 +44,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:81",
+    "http://192.168.10.100",
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -95,7 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Development
 if DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['http://localhost:81']
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:81', 'http://192.168.10.100']
     AUTH_PASSWORD_VALIDATORS = ()
 
 LANGUAGE_CODE = 'en-us'

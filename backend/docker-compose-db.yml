@@ -1,0 +1,10 @@
+services:
+  postgres:
+    container_name: warehouse_app_postgres
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./envs/.env.local
+    volumes:
+      - ./postgres_db:/var/lib/postgresql/data
