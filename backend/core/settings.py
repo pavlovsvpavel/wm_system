@@ -41,8 +41,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4000",
-    "http://127.0.0.1:4000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:81",
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -91,6 +92,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Development
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:81']
+    AUTH_PASSWORD_VALIDATORS = ()
 
 LANGUAGE_CODE = 'en-us'
 

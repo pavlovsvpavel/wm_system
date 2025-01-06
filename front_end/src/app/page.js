@@ -9,6 +9,14 @@ export default function Home() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
 
+    const handleLogin = () => {
+        router.push('/login'); // Navigate to /login
+    };
+
+    const handleRegister = () => {
+        router.push('/register'); // Navigate to /register
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -34,12 +42,12 @@ export default function Home() {
                 <img src="/images/Pepsi-logo.png" alt="logo"/>
                 <h1>Warehouse Management</h1>
                 <div className="button-group">
-                    <Link href="/login">
-                        <button className="button">Login</button>
-                    </Link>
-                    <Link href="/register">
-                        <button className="button">Register</button>
-                    </Link>
+                    {/* <Link href="/login"> */}
+                        <button className="button" onClick={handleLogin}>Login</button>
+                    {/* </Link> */}
+                    {/* <Link href="/register"> */}
+                        <button className="button" onClick={handleRegister}>Register</button>
+                    {/* </Link> */}
                 </div>
             </div>
         </div>

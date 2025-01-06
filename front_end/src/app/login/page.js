@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/login.css';
+import Link from 'next/link';
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
@@ -91,7 +92,7 @@ export default function LoginScreen() {
         Login
       </button>
       <p className="register-link">
-        Don't have an account? <a href="/register">Register here</a>
+        Don't have an account? <Link href="/register">Register here</Link>
       </p>
     </div>
   );

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import '../../styles/register.css';
 import {FaEye, FaEyeSlash} from "react-icons/fa";
+import Link from 'next/link';
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
@@ -110,7 +111,7 @@ export default function RegisterScreen() {
       </button>
 
       <p className="login-link">
-        Already have an account? <a href="/login">Login here</a>
+        Already have an account? <Link href="/login">Login here</Link>
       </p>
     </div>
   );
