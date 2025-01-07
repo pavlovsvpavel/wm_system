@@ -1,12 +1,3 @@
-.qr-scanner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    padding: 20px;
-}
-
 .qr-scanner-container h1 {
     margin-bottom: 20px;
 }
@@ -36,5 +27,36 @@
 
 #qr-reader button:hover {
     background-color: #005bb5;
+}
+
+.camera-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+/* Torch button styling */
+.torch-button {
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: yellow;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+.torch-button.torch-on {
+    background-color: red; /* Red color when torch is on */
+}
+
+.torch-button svg {
+    font-size: 24px;
+    color: #000;
 }
 

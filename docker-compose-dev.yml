@@ -4,11 +4,12 @@ services:
     image: postgres:17
     restart: always
     env_file:
-      - ./backend/envs/.env.local
+      - ./backend/envs/.env.dev
     ports:
       - "5432:5432"
     volumes:
       - ./backend/postgres_db:/var/lib/postgresql/data
+
   backend:
     container_name: wm_app_backend
     build:
@@ -17,7 +18,7 @@ services:
       - "8000:8000"
     restart: always
     env_file:
-      - ./backend/envs/.env.local
+      - ./backend/envs/.env.dev
     depends_on:
       - postgres
     entrypoint: /entrypoint.sh
@@ -27,11 +28,24 @@ services:
       - ./backend/locale:/home/app/backend/locale
     platform: linux/amd64
     command: gunicorn core.wsgi:application --bind=0.0.0.0:8000
+
+  frontend:
+    container_name: wm_app_frontend
+    build:
+      context: .
+      dockerfile: ./front_end/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./front_end/envs/.env.dev
+    depends_on:
+      - backend
+    
   nginx:
     container_name: wm_app_nginx
     build:
       context: .
-      dockerfile: ./webserver/Dockerfile
+      dockerfile: ./nginx/Dockerfile
     restart: always
     volumes:
       - ./backend/staticfiles:/home/app/backend/static_files
@@ -39,5 +53,7 @@ services:
       - ./backend/locale:/home/app/backend/locale
     ports:
       - "81:80"
+      - "443:443"
     depends_on:
       - backend
+      - frontend

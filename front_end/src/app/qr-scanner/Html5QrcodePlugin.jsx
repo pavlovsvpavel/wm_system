@@ -1,5 +1,6 @@
 import { Html5QrcodeScanner, Html5QrcodeScannerState } from 'html5-qrcode';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { BiSolidTorch } from "react-icons/bi";
 
 const qrcodeRegionId = "qr-reader";
 
@@ -18,11 +19,13 @@ const createConfig = (props) => {
     if (props.disableFlip !== undefined) {
         config.disableFlip = props.disableFlip;
     }
+
     return config;
 };
 
 const Html5QrcodePlugin = (props) => {
     const scannerRef = useRef(null); // Ref to store the scanner instance
+    const [torchOn, setTorchOn] = useState(false);
 
     useEffect(() => {
         const initiatedStates = [
@@ -42,7 +45,14 @@ const Html5QrcodePlugin = (props) => {
 
             // Initialize the scanner
             const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
-            html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+            // html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+
+            // Try to start the scanner with the back camera
+            html5QrcodeScanner.render(
+                props.qrCodeSuccessCallback,
+                props.qrCodeErrorCallback,
+                { facingMode: { exact: "environment" } } // Try back camera first
+            );
 
             // Store the scanner instance in the ref
             scannerRef.current = html5QrcodeScanner;
@@ -62,8 +72,29 @@ const Html5QrcodePlugin = (props) => {
         };
     }, [props.qrCodeSuccessCallback, props.qrCodeErrorCallback, props.verbose]);
 
+    // Function to toggle the torch
+    const toggleTorch = () => {
+        if (scannerRef.current) {
+            scannerRef.current.applyVideoConstraints({
+                advanced: [{ torch: !torchOn }]
+            }).then(() => {
+                setTorchOn(!torchOn);
+            }).catch(error => {
+                console.error("Failed to toggle torch: ", error);
+            });
+        }
+    };
+
     return (
-        <div id={qrcodeRegionId} />
+        <div className='camera-container'>
+            <div id={qrcodeRegionId} />
+            <button
+                onClick={toggleTorch}
+                className={`torch-button ${torchOn ? 'torch-on' : ''}`}
+            >
+                <BiSolidTorch />
+            </button>
+        </div>
     );
 };
 

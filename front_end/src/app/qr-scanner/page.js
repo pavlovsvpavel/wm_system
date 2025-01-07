@@ -2,7 +2,7 @@
 
 import {useCallback, useState} from 'react';
 import { useRouter } from 'next/navigation';
-import Html5QrcodePlugin from './Html5QrcodePlugin'; // Import the plugin component
+import Html5QrcodePlugin from './Html5QrcodePlugin';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../styles/qr-scanner.css';
 
@@ -21,7 +21,7 @@ export default function QRScanner() {
     }, []);
 
     return (
-        <div className="qr-scanner-container">
+        <div className="container">
             <h1>QR Code Scanner</h1>
             <div
                 style={{
@@ -39,6 +39,8 @@ export default function QRScanner() {
                     disableFlip={false}
                     qrCodeSuccessCallback={handleScanSuccess}
                     qrCodeErrorCallback={handleScanError}
+
+                
                 />
 
             </div>
