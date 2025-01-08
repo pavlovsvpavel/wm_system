@@ -12,9 +12,9 @@ class UploadedFileAdmin(admin.ModelAdmin):
 @admin.register(UploadedFileRowData)
 class UploadedFileRowDataAdmin(ExportMixin, admin.ModelAdmin):
     list_display = (
-        'id', 'file', 'serial_number', 'item_name', 'account_key', 'account_name', 'account_address',
-        'account_bulstat', 'account_type', 'asset_model', 'warehouse', 'agent', 'agent_name',
-        'asset_type', 'condition', 'scan_warehouse',
+        'id', 'file', 'pos_serial_number', 'outlet_whs_name',
+        'scanned_technical_condition', 'scanned_outlet_whs_name',
+        'created_at', 'updated_at',
     )
 
     ordering = ('-file__upload_date',)

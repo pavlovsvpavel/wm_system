@@ -2,17 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-    --background: #ffffff;
-    --foreground: #171717;
-    --font-ubuntu: 'Ubuntu', sans-serif;
-}
+@import url('home.css');
+@import url('dashboard.css');
+@import url('upload.css');
+@import url('export.css');
+@import url('search.css');
+@import url('qr-scanner.css');
+@import url('login-register.css');
+@import url('navbar.css');
+@import url('button.css');
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
+:root {
+    --background: #000000;
+    --text-color: #ffffff;
+    --font-ubuntu: 'Ubuntu', sans-serif;
 }
 
 *, *::before, *::after {
@@ -31,7 +34,7 @@ html {
 }
 
 body {
-    color: var(--foreground);
+    color: var(--text-color);
     background: var(--background);
 }
 

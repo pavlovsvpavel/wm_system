@@ -42,8 +42,8 @@ from upload_files.serializers import UploadedFileRowDataSerializer
 
 
 ADDITIONAL_FIELDS = {
-    'condition': 'condition_data',
-    'scan_warehouse': 'scan_warehouse_data',
+    'scanned_technical_condition': 'condition_data',
+    'scanned_outlet_whs_name': 'scan_warehouse_data',
 }
 
 
@@ -104,7 +104,7 @@ class QRCodeSearchView(api_generic_views.RetrieveUpdateAPIView):
         qr_code = request.data.get('qr_code')
         file_id = request.data.get('file_id')
         uploaded_file = get_object_or_404(UploadedFile, id=file_id)
-        row = UploadedFileRowData.objects.filter(file=uploaded_file, serial_number=qr_code).first()
+        row = UploadedFileRowData.objects.filter(file=uploaded_file, pos_serial_number=qr_code).first()
         return row
 
     def update(self, request, *args, **kwargs):
@@ -131,7 +131,7 @@ class QRCodeSearchView(api_generic_views.RetrieveUpdateAPIView):
                     # Add a new row if no match is found
                     new_row = UploadedFileRowData.objects.create(
                         file=get_object_or_404(UploadedFile, id=serializer.validated_data['file_id']),
-                        serial_number=serializer.validated_data['qr_code'],
+                        pos_serial_number=serializer.validated_data['qr_code'],
                         **additional_data,
                     )
                     return Response({

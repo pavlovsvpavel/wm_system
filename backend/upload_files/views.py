@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 from django.db import transaction
 from django.http import Http404
@@ -9,6 +11,8 @@ from upload_files.models import UploadedFile, UploadedFileRowData
 from upload_files.permissions import IsOwnerPermission
 from upload_files.serializers import UploadedFileSerializer
 
+# Suppress the warning for headers and footers
+warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
 
 class UploadFileView(api_generic_views.CreateAPIView):
     queryset = UploadedFile.objects.all()
@@ -45,7 +49,7 @@ class UploadFileView(api_generic_views.CreateAPIView):
                 actual_columns = set(df.columns)
 
                 #Now you can perform your checks based on actual_columns
-                required_columns = {'SERIALNUMBER', 'WAREHOUSE', 'CONDITION', 'SCANWAREHOUSE'}
+                required_columns = {'POS SN', 'Outlet/WHS name', 'Scanned_Technical_condition', 'Scanned_WHS'}
                 if not required_columns.issubset(actual_columns):
                     return Response({'error': f'Missing required columns: {required_columns - actual_columns}'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -54,20 +58,37 @@ class UploadFileView(api_generic_views.CreateAPIView):
                 row_objects = [
                     UploadedFileRowData(
                         file=uploaded_file,
-                        serial_number=str(row['SERIALNUMBER']),
-                        item_name=str(row['ITEMNAME']),
-                        account_key=str(row['ACCOUNTKEY']),
-                        account_name=str(row['ACCOUNTNAME']),
-                        account_address=str(row['ADRESA_POS']),
-                        account_bulstat=str(row['TAXFILENUM']),
-                        account_type=str(row['PROFILE6']),
-                        asset_model=str(row['ASSETMODEL']),
-                        warehouse=str(row['WAREHOUSE']),
-                        agent=str(row['AGENT']),
-                        agent_name=str(row['NAME']),
-                        asset_type=str(row['SORTCODENAME']),
-                        condition=str(row['CONDITION']),
-                        scan_warehouse=str(row['SCANWAREHOUSE']),
+                        pos_serial_number=str(row['POS SN']),
+                        whs_outlet=str(row['WHS/Outlet']),
+                        date_of_movement=str(row['Date of movement']),
+                        outlet_whs_ext_code=str(row['Outlet/WHS Ext code']),
+                        outlet_whs_name=str(row['Outlet/WHS name']),
+                        outlet_whs_address=str(row['Outlet/WHS address']),
+                        vat_id=str(row['VAT ID']),
+                        network_name=str(row['Network name']),
+                        gps_coordinates=str(row['GPS coordinates']),
+                        outlet_category=str(row['Outlet Category']),
+                        contract_exp_date=str(row['Contract exp date']),
+                        contract_number=str(row['Contract #']),
+                        pos_category=str(row['POS Category']),
+                        pos_type=str(row['POS Type']),
+                        pos_brand=str(row['POS Brand']),
+                        pos_model=str(row['POS Model']),
+                        pos_asset_number=str(row['POS Asset #']),
+                        technical_condition=str(row['Technical condition']),
+                        year_of_production=str(row['Year of production']),
+                        remark=str(row['Remark']),
+                        last_inv_date=str(row['Last Inv date']),
+                        nm_name=str(row['NM name']),
+                        rsm_name=str(row['RSM name']),
+                        asm_name=str(row['ASM name']),
+                        sr_code=str(row['SR code']),
+                        sr_name=str(row['SR name']),
+                        additional_comment=str(row['AdditionalComment']),
+                        is_contract=str(row['Is contract (Sum)']),
+                        is_protocol=str(row['Is protocol (Sum)']),
+                        scanned_technical_condition=str(row['Scanned_Technical_condition']),
+                        scanned_outlet_whs_name=str(row['Scanned_WHS']),
                     )
                     for _, row in df.iterrows()
                 ]

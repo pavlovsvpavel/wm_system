@@ -1,25 +1,42 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
-import '../../styles/upload.css';
-import { toast } from 'react-toastify';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { useAuth } from '../context/AuthContext';
 
 export default function UploadFile() {
     const [selectedFile, setSelectedFile] = useState(null);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const router = useRouter();
-
+    const { isAuthenticated, isLoading } = useAuth();
+    
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login')
+            toast.error("You are not authenticated. Please log in.");
+        }
+    }, [isAuthenticated, isLoading]);
+
+    if (isLoading) {
+        return (
+            <div className="loading-spinner">
+                <p>Loading</p>
+                <div className="spinner"></div>
+            </div>
+        );
+    }
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             setSelectedFile(file);
-            setError('');
+            setError("");
         }
     };
 
@@ -30,7 +47,7 @@ export default function UploadFile() {
         const file = event.dataTransfer.files[0];
         if (file) {
             setSelectedFile(file);
-            setError('');
+            setError("");
         }
     };
 
@@ -45,44 +62,53 @@ export default function UploadFile() {
 
     const handleUpload = async () => {
         if (!selectedFile) {
-            setError('Please select a file to upload.');
+            setError("Please select a file to upload.");
             return;
         }
 
-        if (!selectedFile.name.toLowerCase().endsWith('.xlsx') && !selectedFile.name.toLowerCase().endsWith('.xls')) {
-            setError('Invalid file type. Only Excel files are allowed.');
+        if (
+            !selectedFile.name.toLowerCase().endsWith(".xlsx") &&
+            !selectedFile.name.toLowerCase().endsWith(".xls")
+        ) {
+            setError("Invalid file type. Only Excel files are allowed.");
             return;
         }
 
         setIsUploading(true);
-        setError('');
+        setError("");
 
         try {
             const formData = new FormData();
-            formData.append('file', selectedFile);
+            formData.append("file", selectedFile);
 
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem("token");
             if (!token) {
-                setError('You are not authenticated. Please log in.');
+                setError("You are not authenticated. Please log in.");
                 return;
             }
 
-            const response = await axios.post(`${BASE_URL}/api/upload/file/`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Token ${token}`,
-                },
-            });
+            const response = await axios.post(
+                `${BASE_URL}/api/upload/file/`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Token ${token}`,
+                    },
+                }
+            );
 
             if (response.status === 201) {
-                toast.success('File uploaded successfully!');
-                router.push('/dashboard');
+                toast.success("File uploaded successfully!");
+                router.push("/dashboard");
             } else {
-                setError('Upload failed. Please try again.');
+                setError("Upload failed. Please try again.");
             }
         } catch (error) {
-            console.error('Upload error:', error);
-            setError(error.response?.data?.error || 'An error occurred. Please try again.');
+            setError(
+                error.response?.data?.error ||
+                "An error occurred. Please try again."
+            );
         } finally {
             setIsUploading(false);
         }
@@ -94,7 +120,7 @@ export default function UploadFile() {
             {error && <p className="error-message">{error}</p>}
 
             <div
-                className={`dropzone ${isDragging ? 'dragging' : ''}`}
+                className={`dropzone ${isDragging ? "dragging" : ""}`}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -114,11 +140,17 @@ export default function UploadFile() {
             </div>
 
             {selectedFile && (
-                <p className="selected-file">Selected file: {selectedFile.name}</p>
+                <p className="selected-file">
+                    Selected file: {selectedFile.name}
+                </p>
             )}
 
-            <button onClick={handleUpload} disabled={isUploading} className="upload-button">
-                {isUploading ? 'Uploading...' : 'Upload'}
+            <button
+                onClick={handleUpload}
+                disabled={isUploading}
+                className="upload-button"
+            >
+                {isUploading ? <div className="spinner"></div> : "Upload"}
             </button>
         </div>
     );

@@ -1,26 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import '../../styles/register.css';
 import {FaEye, FaEyeSlash} from "react-icons/fa";
 import Link from 'next/link';
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);  // State for showing password
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for showing confirm password
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   const handleRegister = async () => {
-    // Validate inputs
     if (!username || !password || !confirmPassword) {
       setError('Please fill in all fields.');
       return;
@@ -34,13 +31,11 @@ export default function RegisterScreen() {
     try {
       const response = await axios.post(`${BASE_URL}/api/accounts/register/`, {
         username,
-        email,
         password,
       });
 
       if (response.status === 201) {
-        console.log('Registration successful:', response.data);
-        router.push('/login'); // Redirect to login page after successful registration
+        router.push('/login');
       } else {
         setError('Registration failed. Please try again.');
       }
@@ -48,6 +43,14 @@ export default function RegisterScreen() {
       console.error('Registration error:', error.message);
       setError(error.response?.data?.message || 'An error occurred. Please try again.');
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prevState) => !prevState);
   };
 
   return (
@@ -78,10 +81,10 @@ export default function RegisterScreen() {
           />
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="toggle-password"
+            onClick={togglePasswordVisibility}
+            className="password-toggle-btn"
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Toggle eye icon */}
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
       </div>
@@ -98,19 +101,19 @@ export default function RegisterScreen() {
           />
           <button
             type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="toggle-password"
+            onClick={toggleConfirmPasswordVisibility}
+            className="password-toggle-btn"
           >
-            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />} {/* Toggle eye icon */}
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
       </div>
 
-      <button onClick={handleRegister} className="register-button">
+      <button onClick={handleRegister} className="login-register-button">
         Register
       </button>
 
-      <p className="login-link">
+      <p className="login-register-link">
         Already have an account? <Link href="/login">Login here</Link>
       </p>
     </div>

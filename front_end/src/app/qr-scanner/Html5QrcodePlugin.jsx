@@ -87,13 +87,14 @@ const Html5QrcodePlugin = (props) => {
 
     return (
         <div className='camera-container'>
-            <div id={qrcodeRegionId} />
             <button
                 onClick={toggleTorch}
                 className={`torch-button ${torchOn ? 'torch-on' : ''}`}
             >
                 <BiSolidTorch />
             </button>
+            <div id={qrcodeRegionId} />
+        
         </div>
     );
 };

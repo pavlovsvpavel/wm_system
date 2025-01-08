@@ -35,7 +35,6 @@ h1 {
 .export-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
-  border: 1px solid #000;
   color: #000;
 }
 

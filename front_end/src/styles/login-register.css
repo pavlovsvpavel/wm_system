@@ -1,34 +1,16 @@
-.register-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-}
-
-h1 {
-  font-size: 2em;
-  margin-bottom: 1.5em;
-}
-
-.error-message {
-  color: red;
-  margin-bottom: 1em;
-}
-
 .form-group {
   margin-bottom: 1em;
   width: 100%;
   max-width: 300px;
 }
 
-label {
+.form-group label {
   display: block;
   margin-bottom: 0.5em;
   font-weight: bold;
 }
 
-input {
+.form-group input {
   width: 100%;
   padding: 0.8em;
   font-size: 1em;
@@ -37,7 +19,7 @@ input {
   color: #000;
 }
 
-.register-button {
+.login-register-button {
   width: 100%;
   max-width: 300px;
   padding: 0.8em;
@@ -51,22 +33,27 @@ input {
   margin-top: 2em;
 }
 
-.register-button:hover {
+.login-register-button:hover {
   background-color: #005bb5;
 }
 
-.login-link {
+.login-register-link {
   margin-top: 1em;
   font-size: 0.9em;
 }
 
-.login-link a {
+.login-register-link a {
   color: #0070f3;
   text-decoration: none;
 }
 
-.login-link a:hover {
+.login-register-link a:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 1em;
 }
 
 .password-input {
@@ -76,12 +63,12 @@ input {
 }
 
 .password-input input {
-  padding-right: 30px; /* Space for the eye icon */
+  padding-right: 30px;
 }
 
-.toggle-password {
+.password-toggle-btn {
   position: absolute;
-  right: 10px; /* Positioning the icon to the right of the input */
+  right: 10px;
   background: none;
   border: none;
   cursor: pointer;

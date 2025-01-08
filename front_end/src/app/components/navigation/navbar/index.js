@@ -1,50 +1,100 @@
 'use client';
+
+import { usePathname } from "next/navigation";
 import Link from "next/link";
-import "./navbar.css"
+import "../../../../styles/globals.css"
 import Logo from "./Logo";
-import LogoutButton from "./LogoutButton";
-import {useEffect} from "react";
+import { useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+
 
 const Navbar = () => {
-    // Function to close the sidebar
-    const closeSidebar = () => {
-        const sidebarCheckbox = document.getElementById("sidebar-active");
-        if (sidebarCheckbox) {
-            sidebarCheckbox.checked = false; // Uncheck the checkbox to close the sidebar
-        }
-    };
+    const { isAuthenticated, logout } = useAuth();
+    const pathname = usePathname(); // Get the current route
 
-    // Add event listeners to all sidebar links to close the sidebar when clicked
+    // Define the routes where the Navigation bar should be visible
+    const showNavigationRoutes = ["/upload", "/export", "/search", "/qr-scanner"];
+    const shouldShowNavigation = showNavigationRoutes.includes(pathname);
+
+    // // Early return if the Navbar should not be shown
+    // if (!isAuthenticated || !shouldShowNavigation) {
+    //     return null;
+    // }
+
+    // // const closeSidebar = () => {
+    // //     const sidebarCheckbox = document.getElementById("sidebar-active");
+    // //     if (sidebarCheckbox) {
+    // //         sidebarCheckbox.checked = false;
+    // //     }
+    // // };
+
+    // // Add event listeners to all sidebar links to close the sidebar when clicked
+    // useEffect(() => {
+    //     const closeSidebar = () => {
+    //         const sidebarCheckbox = document.getElementById("sidebar-active");
+    //         if (sidebarCheckbox) {
+    //             sidebarCheckbox.checked = false;
+    //         }
+    //     };
+
+    //     const sidebarLinks = document.querySelectorAll(".nav-links a");
+    //     sidebarLinks.forEach((link) => {
+    //         link.addEventListener("click", closeSidebar);
+    //     });
+
+    //     // Cleanup event listeners on component unmount
+    //     return () => {
+    //         sidebarLinks.forEach((link) => {
+    //             link.removeEventListener("click", closeSidebar);
+    //         });
+    //     };
+    // }, []);
+
     useEffect(() => {
-        const sidebarLinks = document.querySelectorAll(".nav-links a");
-        sidebarLinks.forEach((link) => {
-            link.addEventListener("click", closeSidebar);
-        });
+        if (isAuthenticated && shouldShowNavigation) {
+            const closeSidebar = () => {
+                const sidebarCheckbox = document.getElementById("sidebar-active");
+                if (sidebarCheckbox) {
+                    sidebarCheckbox.checked = false;
+                }
+            };
 
-        // Cleanup event listeners on component unmount
-        return () => {
+            const sidebarLinks = document.querySelectorAll(".nav-links a");
             sidebarLinks.forEach((link) => {
-                link.removeEventListener("click", closeSidebar);
+                link.addEventListener("click", closeSidebar);
             });
-        };
-    }, []);
+
+            // Cleanup event listeners on component unmount
+            return () => {
+                sidebarLinks.forEach((link) => {
+                    link.removeEventListener("click", closeSidebar);
+                });
+            };
+        }
+    }, [isAuthenticated, shouldShowNavigation]); // Add dependencies to ensure useEffect runs when these values change
+
+    // Early return if the Navbar should not be shown
+    if (!isAuthenticated || !shouldShowNavigation) {
+        return null;
+    }
+
     return (
         <>
             <div className="site-header">
                 <div className="container-nav">
                     <div className="header-elements">
                         <div className="site-title">
-                            <Logo/>
+                            <Logo />
                         </div>
                         <div className="navigation">
-                            <input type="checkbox" id="sidebar-active"/>
+                            <input type="checkbox" id="sidebar-active" />
                             <label htmlFor="sidebar-active" className="open-sidebar-button">
-                                <img className="menu-btn" src="/images/menu.svg" alt="menu-icon"/>
+                                <img className="menu-btn" src="/images/menu.svg" alt="menu-icon" />
                             </label>
                             <label id="overlay" htmlFor="sidebar-active"></label>
                             <div className="links-container">
                                 <label htmlFor="sidebar-active" className="close-sidebar-button">
-                                    <img className="menu-btn" src="/images/close.svg" alt="close-icon"/>
+                                    <img className="menu-btn" src="/images/close.svg" alt="close-icon" />
                                 </label>
                                 <ul className="nav-links">
                                     <li>
@@ -63,7 +113,9 @@ const Navbar = () => {
                                         </Link>
                                     </li>
                                 </ul>
-                                <LogoutButton/>
+                                <button className="btn" style={{ color: "#000" }} onClick={logout}>
+                                    Log out
+                                </button>
                             </div>
                         </div>
                     </div>

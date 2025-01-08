@@ -1,13 +1,22 @@
 'use client';
 
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect} from 'react';
 import { useRouter } from 'next/navigation';
 import Html5QrcodePlugin from './Html5QrcodePlugin';
+import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import '../../styles/qr-scanner.css';
+import { useAuth } from '../context/AuthContext';
 
 export default function QRScanner() {
     const router = useRouter();
+    const { isAuthenticated, isLoading } = useAuth();
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login');
+            toast.error("You are not authenticated. Please log in.");
+        }
+    }, [isAuthenticated, isLoading, router]);
 
     // Memorize the success callback to prevent unnecessary re-renders
     const handleScanSuccess = useCallback((decodedText, decodedResult) => {
@@ -20,9 +29,18 @@ export default function QRScanner() {
         console.warn(`Code scan error = ${error}`);
     }, []);
 
+    // Show loading spinner while authentication state is being initialized
+    if (isLoading) {
+        return (
+            <div className="loading-spinner">
+                <p>Loading</p>
+                <div className="spinner"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="container">
-            <h1>QR Code Scanner</h1>
             <div
                 style={{
                     width: '100%',
@@ -39,10 +57,7 @@ export default function QRScanner() {
                     disableFlip={false}
                     qrCodeSuccessCallback={handleScanSuccess}
                     qrCodeErrorCallback={handleScanError}
-
-                
                 />
-
             </div>
         </div>
     );

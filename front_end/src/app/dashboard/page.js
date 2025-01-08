@@ -1,25 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import '../../styles/dashboard.css';
-import {toast} from "react-toastify";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { useAuth } from '../context/AuthContext';
+
 
 export default function Dashboard() {
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
-
+    const { isAuthenticated, isLoading } = useAuth();
+    
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            router.push('/login');
-            toast.error('You are not authenticated. Please log in.');
-        } else {
-            setLoading(false);
+        if (!isLoading && !isAuthenticated) {
+            router.push('/login')
+            toast.error("You are not authenticated. Please log in.");
         }
-    }, [router]);
+    }, [isAuthenticated, isLoading]);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="loading-spinner">
                 <p>Loading</p>
@@ -32,9 +30,15 @@ export default function Dashboard() {
         <div className="container">
             <h1>Dashboard</h1>
             <div className="dashboard-buttons">
-                <button onClick={() => router.push('/upload')}>Upload File</button>
-                <button onClick={() => router.push('/export')}>Export File</button>
-                <button onClick={() => router.push('/search')}>Search Database</button>
+                <button onClick={() => router.push("/upload")}>
+                    Upload File
+                </button>
+                <button onClick={() => router.push("/export")}>
+                    Export File
+                </button>
+                <button onClick={() => router.push("/search")}>
+                    Search Database
+                </button>
             </div>
         </div>
     );

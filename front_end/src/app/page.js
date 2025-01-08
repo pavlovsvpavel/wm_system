@@ -1,33 +1,20 @@
 'use client';
 
-import Link from 'next/link';
-import '../styles/home.css';
-import {useEffect, useState} from "react";
-import {useRouter} from "next/navigation";
+import Link from "next/link";
+import { useEffect } from "react";
+import { useAuth } from '../app/context/AuthContext';
+import { toast } from "react-toastify";
 
 export default function Home() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
-
-    const handleLogin = () => {
-        router.push('/login'); // Navigate to /login
-    };
-
-    const handleRegister = () => {
-        router.push('/register'); // Navigate to /register
-    };
+    const { isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            router.push('/dashboard');
+        if (!isLoading && !isAuthenticated) {
+            toast.error("You are not authenticated. Please log in.");
         }
-        else {
-            setLoading(false);
-        }
-    }, [router]);
+    }, [isAuthenticated, isLoading]);
 
-        if (loading) {
+    if (isLoading) {
         return (
             <div className="loading-spinner">
                 <p>Loading</p>
@@ -39,15 +26,15 @@ export default function Home() {
     return (
         <div className="container">
             <div className="content">
-                <img src="/images/Pepsi-logo.png" alt="logo"/>
+                <img src="/images/Pepsi-logo.png" alt="logo" />
                 <h1>Warehouse Management</h1>
                 <div className="button-group">
-                    {/* <Link href="/login"> */}
-                        <button className="button" onClick={handleLogin}>Login</button>
-                    {/* </Link> */}
-                    {/* <Link href="/register"> */}
-                        <button className="button" onClick={handleRegister}>Register</button>
-                    {/* </Link> */}
+                    <Link href="/login">
+                        <button className="button">Login</button>
+                    </Link>
+                    <Link href="/register">
+                        <button className="button">Register</button>
+                    </Link>
                 </div>
             </div>
         </div>
