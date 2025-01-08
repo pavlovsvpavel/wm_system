@@ -4,21 +4,17 @@ import { Ubuntu } from "next/font/google";
 import "../styles/globals.css";
 import ToastContainer, { toastConfig } from "../utils/toastConfig";
 import "react-toastify/dist/ReactToastify.css";
-import Navigation from "./components/navigation";
+import Navigation from "./components/navigation/navbar";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from '../app/context/AuthContext';
+import { FileProvider } from "../app/context/FileContext";
 
 const ubuntu = Ubuntu({
     weight: ["300", "400", "500", "700"],
     subsets: ["latin", "cyrillic"],
     variable: "--font-ubuntu",
 });
-
-// export const metadata = {
-//   title: "Warehouse management",
-//   description: "",
-// };
 
 export default function RootLayout({ children }) {
     const pathname = usePathname();
@@ -27,11 +23,15 @@ export default function RootLayout({ children }) {
         document.title = "Warehouse Management";
     }, []);
 
-    // Define the routes where the Navigation should be visible
     const showNavigationRoutes = ["/upload", "/export", "/search", "/qr-scanner"];
     const hideNavigationRoutes = ["/", "/login", "/register"]; // Add routes where the Navbar should be hidden
     const shouldShowNavigation = showNavigationRoutes.includes(pathname) && !hideNavigationRoutes.includes(pathname);
-    
+
+    const routesWithFileProvider = ["/search", "/qr-scanner"];
+    const isFileProviderRoute = routesWithFileProvider.some((route) =>
+        typeof window !== "undefined" && window.location.pathname.startsWith(route)
+    );
+
     return (
         <html lang="en">
             <head>
@@ -39,9 +39,12 @@ export default function RootLayout({ children }) {
             </head>
             <body className={ubuntu.variable}>
                 <AuthProvider>
-                {shouldShowNavigation && <Navigation />}
-                    {children}
+                    <FileProvider>
+                        {shouldShowNavigation && <Navigation />}
+                        {children}
+                    </FileProvider>
                 </AuthProvider>
+
                 <ToastContainer {...toastConfig} />
             </body>
         </html>

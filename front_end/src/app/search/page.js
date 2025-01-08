@@ -6,16 +6,16 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../context/AuthContext';
+import { useFile } from "../context/FileContext";
 
 export default function SearchPage() {
-    const [latestFile, setLatestFile] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState(null);
     const [condition, setCondition] = useState("");
     const [scanWarehouse, setScanWarehouse] = useState("");
     const router = useRouter();
-    const hasSearchedRef = useRef(false);
     const { isAuthenticated, isLoading } = useAuth();
+    const { latestFile, setLatestFile } = useFile();
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -28,50 +28,37 @@ export default function SearchPage() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const fetchLatestFile = async () => {
-                try {
-                    const token = localStorage.getItem("token");
-                    const response = await axios.get(
-                        `${BASE_URL}/api/upload/latest-file/`,
-                        {
-                            headers: {
-                                Authorization: `Token ${token}`,
-                            },
+            if (!latestFile) {
+                const fetchLatestFile = async () => {
+                    try {
+                        const token = localStorage.getItem("token");
+                        const response = await axios.get(
+                            `${BASE_URL}/api/upload/latest-file/`,
+                            { headers: { Authorization: `Token ${token}` } }
+                        );
+                        if (response.status === 200) {
+                            setLatestFile(response.data);
+                            toast.success("Database loaded successfully.");
                         }
-                    );
-
-                    if (response.status === 200) {
-                        setLatestFile(response.data);
-                        toast.success("Database loaded successfully.");
-                    } else {
-                        toast.error("No files found. Please upload a file first.");
+                    } catch {
+                        toast.error("Failed to fetch latest database.");
                     }
-                } catch (error) {
-                    const errorMessage =
-                        error.response?.data?.error ||
-                        "Failed to fetch the latest file.";
-                    toast.error(errorMessage);
-                }
-            };
-
-            fetchLatestFile();
+                };
+    
+                fetchLatestFile();
+            }
         }
-
-    }, [isAuthenticated, BASE_URL, router]);
+        }, [latestFile, setLatestFile, BASE_URL]);
 
     // Handle QR code value from query parameters
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
         const qrCodeValue = queryParams.get("qr");
 
-        if (qrCodeValue && !hasSearchedRef.current) {
+        if (qrCodeValue) {
             setSearchQuery(qrCodeValue);
-
-            if (latestFile) {
-                hasSearchedRef.current = true;
-                handleSearch(qrCodeValue);
-            }
         }
+
     }, [latestFile]);
 
     const handleSearch = useCallback(
@@ -112,7 +99,6 @@ export default function SearchPage() {
                     );
                 }
             } catch (error) {
-                console.error("Search error:", error);
                 toast.error("Failed to perform search. Please try again.");
             }
         },
@@ -166,13 +152,10 @@ export default function SearchPage() {
 
                             if (response.status === 200) {
                                 setLatestFile(response.data);
+                                toast.success("Database reloaded successfully.");
                             }
                         } catch (error) {
-                            // console.error('Error fetching latest file:', error);
-                            toast.error(
-                                error.response?.data?.error ||
-                                "Failed to fetch the latest file. Please try again."
-                            );
+                            toast.error("Failed to fetch latest database.");
                         }
                     };
 
@@ -180,10 +163,7 @@ export default function SearchPage() {
                 }
             } catch (error) {
                 console.error("Save error:", error);
-                toast.error(
-                    error.response?.data?.message ||
-                    "Failed to save changes. Please try again."
-                );
+                toast.error("Failed to save changes. Please try again.");
             }
         };
     }

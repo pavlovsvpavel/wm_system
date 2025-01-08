@@ -8,47 +8,12 @@ import { useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 
 
-const Navbar = () => {
+const Navigation = () => {
     const { isAuthenticated, logout } = useAuth();
-    const pathname = usePathname(); // Get the current route
+    const pathname = usePathname();
 
-    // Define the routes where the Navigation bar should be visible
     const showNavigationRoutes = ["/upload", "/export", "/search", "/qr-scanner"];
     const shouldShowNavigation = showNavigationRoutes.includes(pathname);
-
-    // // Early return if the Navbar should not be shown
-    // if (!isAuthenticated || !shouldShowNavigation) {
-    //     return null;
-    // }
-
-    // // const closeSidebar = () => {
-    // //     const sidebarCheckbox = document.getElementById("sidebar-active");
-    // //     if (sidebarCheckbox) {
-    // //         sidebarCheckbox.checked = false;
-    // //     }
-    // // };
-
-    // // Add event listeners to all sidebar links to close the sidebar when clicked
-    // useEffect(() => {
-    //     const closeSidebar = () => {
-    //         const sidebarCheckbox = document.getElementById("sidebar-active");
-    //         if (sidebarCheckbox) {
-    //             sidebarCheckbox.checked = false;
-    //         }
-    //     };
-
-    //     const sidebarLinks = document.querySelectorAll(".nav-links a");
-    //     sidebarLinks.forEach((link) => {
-    //         link.addEventListener("click", closeSidebar);
-    //     });
-
-    //     // Cleanup event listeners on component unmount
-    //     return () => {
-    //         sidebarLinks.forEach((link) => {
-    //             link.removeEventListener("click", closeSidebar);
-    //         });
-    //     };
-    // }, []);
 
     useEffect(() => {
         if (isAuthenticated && shouldShowNavigation) {
@@ -64,16 +29,14 @@ const Navbar = () => {
                 link.addEventListener("click", closeSidebar);
             });
 
-            // Cleanup event listeners on component unmount
             return () => {
                 sidebarLinks.forEach((link) => {
                     link.removeEventListener("click", closeSidebar);
                 });
             };
         }
-    }, [isAuthenticated, shouldShowNavigation]); // Add dependencies to ensure useEffect runs when these values change
+    }, [isAuthenticated, shouldShowNavigation]);
 
-    // Early return if the Navbar should not be shown
     if (!isAuthenticated || !shouldShowNavigation) {
         return null;
     }
@@ -126,4 +89,4 @@ const Navbar = () => {
         ;
 };
 
-export default Navbar;
+export default Navigation;
