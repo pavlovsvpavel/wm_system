@@ -40,11 +40,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://192.168.10.100",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+#     "https://192.168.10.100",
+# ]
+
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
 
 ROOT_URLCONF = 'core.urls'
 
@@ -95,7 +97,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Development
 if DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['https://192.168.10.100',]
+    # CSRF_TRUSTED_ORIGINS = ['https://192.168.10.100',]
+    CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
     AUTH_PASSWORD_VALIDATORS = ()
 
 LANGUAGE_CODE = 'en-us'

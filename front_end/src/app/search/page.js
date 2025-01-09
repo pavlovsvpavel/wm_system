@@ -69,7 +69,7 @@ export default function SearchPage() {
             }
 
             if (!latestFile) {
-                toast.error("No files found. Please upload a file first.");
+                toast.error("No database found. Please upload database first.");
                 return;
             }
 
@@ -132,7 +132,7 @@ export default function SearchPage() {
 
                 if (response.status === 200) {
                     toast.success(response.data.message);
-                    setSearchQuery("");
+                    // setSearchQuery("");
                     setSearchResults(null);
                     setCondition("");
                     setScanWarehouse("");
@@ -153,6 +153,7 @@ export default function SearchPage() {
                             if (response.status === 200) {
                                 setLatestFile(response.data);
                                 toast.success("Database reloaded successfully.");
+
                             }
                         } catch (error) {
                             toast.error("Failed to fetch latest database.");
