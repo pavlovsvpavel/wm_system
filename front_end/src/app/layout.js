@@ -23,8 +23,8 @@ export default function RootLayout({ children }) {
         document.title = "Warehouse Management";
     }, []);
 
-    const showNavigationRoutes = ["/upload", "/export", "/search", "/qr-scanner"];
-    const hideNavigationRoutes = ["/", "/login", "/register"]; // Add routes where the Navbar should be hidden
+    const showNavigationRoutes = ["/dashboard", "/upload", "/export", "/search", "/qr-scanner"];
+    const hideNavigationRoutes = ["/", "/login", "/register"];
     const shouldShowNavigation = showNavigationRoutes.includes(pathname) && !hideNavigationRoutes.includes(pathname);
 
     const routesWithFileProvider = ["/search", "/qr-scanner"];

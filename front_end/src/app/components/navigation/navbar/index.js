@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import "../../../../styles/globals.css"
-import Logo from "./Logo";
 import { useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -12,7 +11,7 @@ const Navigation = () => {
     const { isAuthenticated, logout } = useAuth();
     const pathname = usePathname();
 
-    const showNavigationRoutes = ["/upload", "/export", "/search", "/qr-scanner"];
+    const showNavigationRoutes = ["/dashboard", "/upload", "/export", "/search", "/qr-scanner"];
     const shouldShowNavigation = showNavigationRoutes.includes(pathname);
 
     useEffect(() => {
@@ -47,7 +46,9 @@ const Navigation = () => {
                 <div className="container-nav">
                     <div className="header-elements">
                         <div className="site-title">
-                            <Logo />
+                            <Link href="/dashboard">
+                                <img src="/images/Pepsi-logo.png" alt="Logo" />
+                            </Link>
                         </div>
                         <div className="navigation">
                             <input type="checkbox" id="sidebar-active" />

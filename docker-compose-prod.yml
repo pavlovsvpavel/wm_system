@@ -38,6 +38,7 @@ services:
       - "3000:3000"
     env_file:
       - ./front_end/envs/.env.prod
+    command: bash -c "npm run docker-build && npm run docker-start"
     depends_on:
       - backend
     
@@ -56,4 +57,4 @@ services:
       - "443:443"
     depends_on:
       - backend
-      - frontend
+
