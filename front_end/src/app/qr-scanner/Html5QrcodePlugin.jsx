@@ -45,14 +45,14 @@ const Html5QrcodePlugin = (props) => {
 
             // Initialize the scanner
             const html5QrcodeScanner = new Html5QrcodeScanner(qrcodeRegionId, config, verbose);
-            // html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
+            html5QrcodeScanner.render(props.qrCodeSuccessCallback, props.qrCodeErrorCallback);
 
             // Try to start the scanner with the back camera
-            html5QrcodeScanner.render(
-                props.qrCodeSuccessCallback,
-                props.qrCodeErrorCallback,
-                { facingMode: { exact: "environment" } } // Try back camera first
-            );
+            // html5QrcodeScanner.render(
+            //     props.qrCodeSuccessCallback,
+            //     props.qrCodeErrorCallback,
+            //     { deviceId: { exact: "0" } } // Try back camera first
+            // );
 
             // Store the scanner instance in the ref
             scannerRef.current = html5QrcodeScanner;

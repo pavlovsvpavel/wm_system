@@ -60,3 +60,21 @@
     color: #000;
 }
 
+#qr-reader__dashboard_section_csr span {
+    margin: 0;
+}
+
+#qr-reader__dashboard #html5-qrcode-select-camera {
+    display: flex;
+    text-align: center;
+    min-height: 40px;
+    color: #fff;
+    background-color: #0070f3;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+#qr-reader__dashboard #html5-qrcode-select-camera:disabled {
+    background-color: #ccc;
+}
+

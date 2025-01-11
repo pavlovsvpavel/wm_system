@@ -45,14 +45,14 @@ services:
     
   nginx:
     container_name: wm_app_nginx
-    build:
-      context: .
-      dockerfile: ./nginx/prod/Dockerfile
+    image: nginx
     restart: on-failure
     volumes:
       - ./backend/staticfiles:/home/app/backend/static_files
       - ./backend/mediafiles:/home/app/backend/mediafiles
       - ./backend/locale:/home/app/backend/locale
+      - ./nginx/prod/conf.d:/etc/nginx/conf.d
+      - ./nginx/prod/logs:/var/log/nginx
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     ports:
