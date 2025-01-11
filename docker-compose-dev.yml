@@ -13,7 +13,10 @@ services:
   backend:
     container_name: wm_app_backend
     build:
-      context: ./backend
+      context: .
+      dockerfile: ./backend/Dockerfile
+      args:
+        DOCKER_BUILDKIT: 1
     ports:
       - "8000:8000"
     restart: always
