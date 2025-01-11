@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import {FaEye, FaEyeSlash} from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from 'next/link';
 
 export default function RegisterScreen() {
@@ -29,19 +28,26 @@ export default function RegisterScreen() {
     }
 
     try {
-      const response = await axios.post(`${BASE_URL}/api/accounts/register/`, {
-        username,
-        password,
+      const response = await fetch(`${BASE_URL}/api/accounts/register/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
       });
 
       if (response.status === 201) {
         router.push('/login');
       } else {
-        setError('Registration failed. Please try again.');
+        const errorData = await response.json()
+        setError(errorData?.username || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      console.error('Registration error:', error.message);
-      setError(error.response?.data?.message || 'An error occurred. Please try again.');
+      console.error('Registration error:', error);
+      setError('An error occurred. Please try again.');
     }
   };
 

@@ -4,17 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "cross-env ENV=local next dev",
-    
     "docker-dev": "cross-env ENV=dev next dev",
     "docker-build": "cross-env ENV=dev next build",
     "docker-start": "cross-env ENV=dev next start",
-
     "build": "cross-env ENV=prod next build",
     "start": "cross-env ENV=prod next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "html5-qrcode": "^2.3.8",
     "next": "15.1.3",

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from "axios";
 import Html5QrcodePlugin from './Html5QrcodePlugin';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -28,15 +27,27 @@ export default function QRScanner() {
     const handleScanSuccess = async (decodedText) => {
         if (!latestFile) {
             const token = localStorage.getItem("token");
-            const response = await axios.get(
-                `${BASE_URL}/api/upload/latest-file/`,
-                { headers: { Authorization: `Token ${token}` } }
-            );
-            if (response.status === 200) {
-                setLatestFile(response.data);
-                toast.success("Database loaded successfully.");
+            try {
+                const response = await fetch(`${BASE_URL}/api/upload/latest-file/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Token ${token}`,
+                    },
+                });
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    setLatestFile(data);
+                    toast.success("Database loaded successfully.");
+                } else {
+                    toast.error("Failed to load the database.");
+                }
+            } catch (error) {
+                console.error("Error fetching latest file:", error);
+                toast.error("An error occurred. Please try again.");
             }
         }
+
         router.replace(`/search?qr=${decodedText}`);
     };
 

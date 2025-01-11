@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
@@ -32,23 +31,31 @@ export default function SearchPage() {
                 const fetchLatestFile = async () => {
                     try {
                         const token = localStorage.getItem("token");
-                        const response = await axios.get(
-                            `${BASE_URL}/api/upload/latest-file/`,
-                            { headers: { Authorization: `Token ${token}` } }
-                        );
+                        const response = await fetch(`${BASE_URL}/api/upload/latest-file/`, {
+                            method: "GET",
+                            headers: {
+                                Authorization: `Token ${token}`,
+                            },
+                        });
+
                         if (response.status === 200) {
-                            setLatestFile(response.data);
+                            const data = await response.json();
+                            setLatestFile(data);
                             toast.success("Database loaded successfully.");
+                        } else {
+                            toast.error("Failed to fetch latest database.");
                         }
-                    } catch {
+                    } catch (error) {
+                        console.error("Error fetching latest file:", error);
                         toast.error("Failed to fetch latest database.");
                     }
                 };
-    
+
                 fetchLatestFile();
             }
         }
-        }, [latestFile, setLatestFile, BASE_URL]);
+    }, [latestFile, setLatestFile, BASE_URL]);
+
 
     // Handle QR code value from query parameters
     useEffect(() => {
@@ -106,68 +113,66 @@ export default function SearchPage() {
     );
 
     const handleSave = async () => {
-        
         if (!searchResults) {
             toast.error("No data to save.");
             return;
         }
-
+    
         if (isAuthenticated) {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.patch(
-                    `${BASE_URL}/api/search/`,
-                    {
+                const response = await fetch(`${BASE_URL}/api/search/`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`,
+                    },
+                    body: JSON.stringify({
                         qr_code: searchResults.pos_serial_number,
                         file_id: latestFile.id,
                         condition_data: condition,
                         scan_warehouse_data: scanWarehouse,
-                    },
-                    {
-                        headers: {
-                            Authorization: `Token ${token}`,
-                        },
-                    }
-                );
-
+                    }),
+                });
+    
                 if (response.status === 200) {
-                    toast.success(response.data.message);
-                    // setSearchQuery("");
+                    const data = await response.json();
+                    toast.success(data.message);
+    
+                    // Reset form fields after save
+                    setSearchQuery("");
                     setSearchResults(null);
                     setCondition("");
                     setScanWarehouse("");
-
+    
                     // Fetch the latest file again after saving
                     const fetchLatestFile = async () => {
                         try {
-                            const token = localStorage.getItem("token");
-                            const response = await axios.get(
-                                `${BASE_URL}/api/upload/latest-file/`,
-                                {
-                                    headers: {
-                                        Authorization: `Token ${token}`,
-                                    },
-                                }
-                            );
-
+                            const response = await fetch(`${BASE_URL}/api/upload/latest-file/`, {
+                                method: "GET",
+                                headers: {
+                                    Authorization: `Token ${token}`,
+                                },
+                            });
+    
                             if (response.status === 200) {
-                                setLatestFile(response.data);
+                                const data = await response.json();
+                                setLatestFile(data);
                                 toast.success("Database reloaded successfully.");
-
                             }
                         } catch (error) {
                             toast.error("Failed to fetch latest database.");
                         }
                     };
-
+    
                     fetchLatestFile();
                 }
             } catch (error) {
                 console.error("Save error:", error);
                 toast.error("Failed to save changes. Please try again.");
             }
-        };
-    }
+        }
+    };    
 
     // Show loading spinner while authentication state is being initialized
     if (isLoading) {

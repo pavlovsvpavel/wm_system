@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../context/AuthContext';
@@ -29,28 +28,28 @@ export default function ExportFile() {
             const fetchFiles = async () => {
                 try {
                     const token = localStorage.getItem("token");
-                    const response = await axios.get(
-                        `${BASE_URL}/api/upload/get-files/`,
-                        {
-                            headers: {
-                                Authorization: `Token ${token}`,
-                            },
-                        }
-                    );
+                    const response = await fetch(`${BASE_URL}/api/upload/get-files/`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Token ${token}`,
+                        },
+                    });
 
-                    if (response.status === 200) {
-                        setFiles(response.data);
-                        toast.success("Database loaded successfully.");
+                    if (response.ok) {
+                        const data = await response.json();
+                        setFiles(data);
+                        toast.success("Databases loaded successfully.");
+                    } else {
+                        throw new Error(`Failed with status: ${response.status}`);
                     }
                 } catch (error) {
                     console.error("Error fetching files:", error);
-                    toast.error("Failed to fetch files. Please try again.");
+                    toast.error("Failed to fetch databases. Please try again.");
                 }
             };
 
             fetchFiles();
         }
-
     }, [isAuthenticated, BASE_URL, router]);
 
     const handleFileChange = (event) => {
@@ -58,48 +57,53 @@ export default function ExportFile() {
     };
 
     const handleExport = async () => {
-        if (!selectedFileId) {
-            toast.error("Please select a file to export.");
-            return;
-        }
-
         setIsExporting(true);
         if (isAuthenticated) {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get(
+                const response = await fetch(
                     `${BASE_URL}/api/export/${selectedFileId}/`,
                     {
+                        method: "GET",
                         headers: {
                             Authorization: `Token ${token}`,
                         },
-                        responseType: "blob",
                     }
                 );
 
                 if (response.status === 200) {
+                    const contentDisposition = response.headers.get("Content-Disposition");
+
+                    // Extract filename from Content-Disposition header
                     let filename = "exported_file.xlsx";
 
-                    const url = window.URL.createObjectURL(
-                        new Blob([response.data])
-                    );
+                    if (contentDisposition) {
+                        // Extract filename using regex
+                        const match = contentDisposition.match(/filename="([^"]+)"/);
+                        if (match && match[1]) {
+                            filename = match[1];
+                        }
+                    }
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
                     const link = document.createElement("a");
                     link.href = url;
-                    link.setAttribute("download", filename);
+                    link.setAttribute("download", filename); // Use the extracted filename
                     document.body.appendChild(link);
                     link.click();
                     link.remove();
 
                     toast.success("File exported successfully!");
+                } else {
+                    throw new Error("Export failed");
                 }
             } catch (error) {
                 console.error("Export error:", error);
-                if (error.response) {
-                    if (error.response.status === 404) {
-                        toast.error("File not found. Please check the file ID.");
-                    } else {
-                        toast.error("Failed to export file. Please try again.");
-                    }
+                if (error.message === "Export failed") {
+                    toast.error("Failed to export file. Please try again.");
+                } else if (error.response && error.response.status === 404) {
+                    toast.error("File not found. Please check the file ID.");
                 } else {
                     toast.error("An unexpected error occurred. Please try again.");
                 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAuth } from '../context/AuthContext';
@@ -80,35 +79,31 @@ export default function UploadFile() {
         try {
             const formData = new FormData();
             formData.append("file", selectedFile);
-
+    
             const token = localStorage.getItem("token");
             if (!token) {
                 setError("You are not authenticated. Please log in.");
                 return;
             }
-
-            const response = await axios.post(
-                `${BASE_URL}/api/upload/file/`,
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                        Authorization: `Token ${token}`,
-                    },
-                }
-            );
-
+    
+            const response = await fetch(`${BASE_URL}/api/upload/file/`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Token ${token}`,
+                },
+                body: formData,
+            });
+    
             if (response.status === 201) {
                 toast.success("File uploaded successfully!");
                 router.push("/dashboard");
             } else {
-                setError("Upload failed. Please try again.");
+                const errorData = await response.json();
+                setError(errorData?.error || "Upload failed. Please try again.");
             }
         } catch (error) {
-            setError(
-                error.response?.data?.error ||
-                "An error occurred. Please try again."
-            );
+            console.error("Upload error:", error);
+            setError("An error occurred. Please try again.");
         } finally {
             setIsUploading(false);
         }

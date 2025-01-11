@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from "next/link";
 import { useAuth } from '../context/AuthContext';
@@ -22,35 +21,44 @@ export default function LoginScreen() {
             setError("Please enter both username and password.");
             return;
         }
-
+    
         try {
-            const response = await axios.post(
-                `${BASE_URL}/api/accounts/login/`,
-                {
+            const response = await fetch(`${BASE_URL}/api/accounts/login/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
                     username,
                     password,
+                }),
+            });
+    
+            if (!response.ok) {
+                if (response.status === 400) {
+                    setError("Invalid username or password.");
+                } else {
+                    setError("An error occurred. Please try again.");
                 }
-            );
-
-            if (response.status !== 200 || !response.data.token) {
+                return;
+            }
+    
+            const data = await response.json();
+    
+            if (!data.token) {
                 setError("Invalid username or password.");
                 return;
             }
-
-            const { token } = response.data;
-
+    
+            const { token } = data;
+    
             login(token);
             router.push("/dashboard");
         } catch (error) {
             console.error("Login error:", error);
-
-            if (error.response && error.response.status === 400) {
-                setError("Invalid username or password.");
-            } else {
-                setError("An error occurred. Please try again.");
-            }
+            setError("An error occurred. Please try again.");
         }
-    };
+    };    
 
     const togglePasswordVisibility = () => {
         setShowPassword((prevState) => !prevState);
