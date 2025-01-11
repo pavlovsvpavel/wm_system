@@ -5,7 +5,7 @@ from rest_framework import generics as api_generic_views
 from rest_framework.response import Response
 
 from export_files.models import UploadedFileRowDataResource
-from upload_files.models import UploadedFile, UploadedFileRowData
+from upload_files.models import UploadedFile
 from upload_files.serializers import UploadedFileSerializer, UploadedFileRowDataSerializer
 
 
@@ -15,13 +15,10 @@ class ExportFileView(api_generic_views.GenericAPIView):
 
     def get(self, request, pk):
         try:
-            # uploaded_file = UploadedFile.objects.get(id=pk)
             uploaded_file = self.serializer_class.Meta.model.objects.get(id=pk)
         except UploadedFile.DoesNotExist:
             return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Fetch related rows
-        # rows = UploadedFileRowData.objects.filter(file=uploaded_file)
         rows = self.serializer_class_row_data.Meta.model.objects.filter(file=uploaded_file)
 
         if not rows.exists():
@@ -34,7 +31,9 @@ class ExportFileView(api_generic_views.GenericAPIView):
         # Export to Excel
         response = HttpResponse(dataset.xlsx,
                                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        safe_file_name = uploaded_file.__str__() + '_export_' + str(timezone.localdate().strftime('%d-%m-%Y'))
+        safe_file_name = 'Export_' + uploaded_file.__str__() + '_' + str(timezone.localdate().strftime('%d-%m-%Y')) + '.xlsx'
+
         response['Content-Disposition'] = f'attachment; filename="{safe_file_name}"'
+        response['Access-Control-Expose-Headers'] = 'Content-Disposition'
 
         return response
