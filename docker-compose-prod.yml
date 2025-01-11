@@ -27,7 +27,7 @@ services:
       - ./backend/mediafiles:/home/app/backend/mediafiles
       - ./backend/locale:/home/app/backend/locale
     platform: linux/amd64
-    command: gunicorn core.wsgi:application --bind=0.0.0.0:8000
+    command: bash -c "gunicorn core.wsgi:application --bind=0.0.0.0:8000 --workers=$((2 * $(nproc) + 1))"
 
   frontend:
     container_name: wm_app_frontend
@@ -36,6 +36,7 @@ services:
       dockerfile: ./front_end/Dockerfile
     ports:
       - "3000:3000"
+    restart: on-failure
     env_file:
       - ./front_end/envs/.env.prod
     command: bash -c "npm run build && npm run start"
@@ -47,7 +48,7 @@ services:
     build:
       context: .
       dockerfile: ./nginx/prod/Dockerfile
-    restart: always
+    restart: on-failure
     volumes:
       - ./backend/staticfiles:/home/app/backend/static_files
       - ./backend/mediafiles:/home/app/backend/mediafiles
