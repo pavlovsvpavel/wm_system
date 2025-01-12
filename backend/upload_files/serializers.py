@@ -8,10 +8,15 @@ class UploadedFileRowDataSerializer(serializers.ModelSerializer):
         model = UploadedFileRowData
         fields = '__all__'
 
-
 class UploadedFileSerializer(serializers.ModelSerializer):
     rows = UploadedFileRowDataSerializer(many=True, read_only=True)
 
     class Meta:
         model = UploadedFile
         fields = ['id', 'name', 'upload_date', 'rows']
+
+
+class ListUploadedFilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UploadedFile
+        fields = ['id', 'name']

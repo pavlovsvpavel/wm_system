@@ -1,17 +1,19 @@
 from django.utils import timezone
 from django.http import HttpResponse
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework import generics as api_generic_views
 from rest_framework.response import Response
 
 from export_files.models import UploadedFileRowDataResource
 from upload_files.models import UploadedFile
+from accounts.permissions import IsOwnerPermission
 from upload_files.serializers import UploadedFileSerializer, UploadedFileRowDataSerializer
 
 
 class ExportFileView(api_generic_views.GenericAPIView):
     serializer_class = UploadedFileSerializer
     serializer_class_row_data = UploadedFileRowDataSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get(self, request, pk):
         try:

@@ -50,5 +50,12 @@ class UploadedFileRowData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    # @property
+    # def file_id(self):
+    #     file_id = self.file.id
+    #
+    #     return file_id
+
     def __str__(self):
         return self.file.name

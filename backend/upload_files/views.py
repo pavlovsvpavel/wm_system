@@ -2,14 +2,13 @@ import warnings
 
 import pandas as pd
 from django.db import transaction
-from django.http import Http404
 from rest_framework import generics as api_generic_views, permissions, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from upload_files.models import UploadedFile, UploadedFileRowData
-from upload_files.permissions import IsOwnerPermission
-from upload_files.serializers import UploadedFileSerializer
+from accounts.permissions import IsOwnerPermission
+from upload_files.serializers import UploadedFileSerializer, ListUploadedFilesSerializer
 
 # Suppress the warning for headers and footers
 warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
@@ -106,36 +105,65 @@ class UploadFileView(api_generic_views.CreateAPIView):
 
 
 
-class UploadedFilesView(api_generic_views.ListAPIView):
+class ListUploadedFilesView(api_generic_views.ListAPIView):
     queryset = UploadedFile.objects.all()
-    serializer_class = UploadedFileSerializer
+    serializer_class = ListUploadedFilesSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get(self, request, *args, **kwargs):
         try:
-            # Fetch all files and serialize them
             uploaded_files = self.get_queryset()
+
+            if not uploaded_files.exists():
+                return Response(
+                    {'message': 'No files uploaded yet.'},
+                    status=status.HTTP_204_NO_CONTENT  # Or any other status like 404
+                )
+
             serializer = self.get_serializer(uploaded_files, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': f"Failed to fetch files: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class LatestUploadedFileView(api_generic_views.RetrieveAPIView):
+class RetrieveLatestFileIdView(api_generic_views.RetrieveAPIView):
     serializer_class = UploadedFileSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
-    def get_object(self):
-        # Fetch the latest uploaded file based on upload_date
-        latest_file = UploadedFile.objects.order_by('-upload_date').first()
-        if not latest_file:
-            raise Http404("No files found.")
-        return latest_file
-
     def get(self, request, *args, **kwargs):
         try:
-            latest_file = self.get_object()
-            serializer = self.get_serializer(latest_file)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            # Fetch the latest uploaded file id based on upload_date
+            latest_file = UploadedFile.objects.order_by('-upload_date').first()
+
+            if latest_file:
+                latest_file_id = latest_file.id
+                latest_file_name = latest_file.name
+                # Check if the session has a current latest file id and if it is different
+                current_file_id = request.session.get('latest_file_id')
+                current_file_name = request.session.get('latest_file_name')
+
+                if current_file_id != latest_file_id and current_file_name != latest_file_name:
+                    # Update the session with the new latest file id
+                    request.session['latest_file_id'] = latest_file_id
+                    request.session['latest_file_name'] = latest_file_name
+                    return Response({
+                        'message': 'New latest file found, session updated.',
+                        'latest_file_id': latest_file_id,
+                        'latest_file_name': latest_file_name,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    # If the latest file in the database is the same as the one in the session
+                    return Response({
+                        'message': 'No new latest file, session remains the same.',
+                        'latest_file_id': current_file_id,
+                        'latest_file_name': current_file_name,
+                    }, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'message': 'No files uploaded yet.'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+
         except Exception as e:
-            return Response({'error': f"Failed to fetch the latest file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f"Failed to fetch the latest file id: {e}"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
