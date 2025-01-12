@@ -18,7 +18,7 @@ export default function UploadFile() {
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.push('/login')
-            toast.error("You are not authenticated. Please log in.");
+            toast.info("You are not authenticated. Please log in.");
         }
     }, [isAuthenticated, isLoading]);
 
@@ -86,7 +86,7 @@ export default function UploadFile() {
                 return;
             }
     
-            const response = await fetch(`${BASE_URL}/api/upload/file/`, {
+            const response = await fetch(`${BASE_URL}/api/files/upload-file/`, {
                 method: "POST",
                 headers: {
                     Authorization: `Token ${token}`,

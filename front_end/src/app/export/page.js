@@ -19,7 +19,7 @@ export default function ExportFile() {
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.push('/login');
-            toast.error("You are not authenticated. Please log in.");
+            toast.info("You are not authenticated. Please log in.");
         }
     }, [isAuthenticated, isLoading, router]);
 
@@ -28,7 +28,7 @@ export default function ExportFile() {
             const fetchFiles = async () => {
                 try {
                     const token = localStorage.getItem("token");
-                    const response = await fetch(`${BASE_URL}/api/upload/get-files/`, {
+                    const response = await fetch(`${BASE_URL}/api/files/get-files/`, {
                         method: "GET",
                         headers: {
                             Authorization: `Token ${token}`,
@@ -37,8 +37,13 @@ export default function ExportFile() {
 
                     if (response.ok) {
                         const data = await response.json();
-                        setFiles(data);
-                        toast.success("Databases loaded successfully.");
+                        if (response.status === 204) {
+                            toast.info("No uploaded databases.");
+                            setFiles([]);
+                        } else {
+                            setFiles(data);
+                            toast.success("Databases loaded successfully.")
+                        }
                     } else {
                         throw new Error(`Failed with status: ${response.status}`);
                     }

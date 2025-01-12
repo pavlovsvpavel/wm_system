@@ -10,7 +10,7 @@ export default function Home() {
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            toast.error("You are not authenticated. Please log in.");
+            toast.info("You are not authenticated. Please log in.");
         }
     }, [isAuthenticated, isLoading]);
 

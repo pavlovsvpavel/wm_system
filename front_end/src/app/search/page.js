@@ -21,7 +21,7 @@ export default function SearchPage() {
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.push('/login');
-            toast.error("You are not authenticated. Please log in.");
+            toast.info("You are not authenticated. Please log in.");
         }
     }, [isAuthenticated, isLoading, router]);
 
@@ -31,7 +31,7 @@ export default function SearchPage() {
                 const fetchLatestFile = async () => {
                     try {
                         const token = localStorage.getItem("token");
-                        const response = await fetch(`${BASE_URL}/api/upload/latest-file/`, {
+                        const response = await fetch(`${BASE_URL}/api/files/latest-file/`, {
                             method: "GET",
                             headers: {
                                 Authorization: `Token ${token}`,
@@ -40,10 +40,18 @@ export default function SearchPage() {
 
                         if (response.status === 200) {
                             const data = await response.json();
+                            // Save the latest file id in sessionStorage
+                            sessionStorage.setItem("latest_file_id", data.latest_file_id);
+                            sessionStorage.setItem("latest_file_name", data.latest_file_name);
                             setLatestFile(data);
                             toast.success("Database loaded successfully.");
+
+                        } else if (response.status === 204) {
+                            toast.info("No database found. Please upload a database first.");
+                            setLatestFile(null);
+
                         } else {
-                            toast.error("Failed to fetch latest database.");
+                            toast.error("Failed to fetch the latest database.");
                         }
                     } catch (error) {
                         console.error("Error fetching latest file:", error);
@@ -54,8 +62,125 @@ export default function SearchPage() {
                 fetchLatestFile();
             }
         }
-    }, [latestFile, setLatestFile, BASE_URL]);
+    }, [BASE_URL, isAuthenticated]);
 
+    const handleSearch = useCallback(
+        async (query = searchQuery) => {
+            const latestFile = sessionStorage.getItem('latest_file_id');
+
+            if (!query) {
+                toast.error("Please enter a serial number.");
+                return;
+            }
+
+            if (!latestFile) {
+                toast.info("No database found. Please upload database first.");
+                return;
+            }
+
+            if (!isAuthenticated) {
+                toast.error("You are not authenticated. Please log in.");
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem("token");
+                const response = await fetch(
+                    `${BASE_URL}/api/db/search/?scanned_pos_serial_number=${query}&latest_file_id=${latestFile}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Token ${token}`,
+                        },
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.pos_serial_number) {
+                    setSearchResults(data);
+                    setCondition(data.scanned_technical_condition);
+                    setScanWarehouse(data.scanned_outlet_whs_name);
+
+                    toast.success("Match found!");
+                } else {
+                    setSearchResults({
+                        pos_serial_number: query,
+                        outlet_whs_name: "",
+                        outlet_whs_address: "",
+                        pos_type: "",
+                        scanned_technical_condition: "",
+                        scanned_outlet_whs_name: "",
+                    });
+
+                    setCondition("");
+                    setScanWarehouse("");
+
+                    toast.info('No match found. Click "Save" to add in the database.');
+                }
+
+            } catch (error) {
+                toast.error("Failed to perform search. Please try again.");
+            }
+        },
+        [searchQuery, isAuthenticated]
+    );
+
+    const handleSave = async () => {
+        const latestFile = sessionStorage.getItem('latest_file_id');
+
+        if (!latestFile) {
+            toast.error("No database found. Please upload database first.");
+            return;
+        }
+
+        const payload = {
+            latest_file_id: latestFile,
+            pos_serial_number: searchResults.pos_serial_number,
+            scanned_technical_condition: condition,
+            scanned_outlet_whs_name: scanWarehouse,
+        };
+
+        if (isAuthenticated) {
+            try {
+                const token = localStorage.getItem("token");
+
+                if (!searchResults.pos_serial_number || !condition || !scanWarehouse) {
+                    toast.error("Please fill condition and scanned warehouse fields.");
+                    return;
+                }
+
+                const response = await fetch(`${BASE_URL}/api/db/update/`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`,
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    toast.success(data.message);
+
+                    // Reset form fields after save
+                    setSearchQuery("");
+                    setSearchResults(null);
+                    setCondition("");
+                    setScanWarehouse("");
+                } else {
+                    // Handle non-200 responses
+                    const errorData = await response.json();
+                    toast.error(errorData.message || "Failed to save changes. Please try again.");
+                }
+
+            } catch (error) {
+                console.error("Save error:", error);
+                toast.error("Failed to save changes. Please try again.");
+            }
+        }
+    };
 
     // Handle QR code value from query parameters
     useEffect(() => {
@@ -67,112 +192,6 @@ export default function SearchPage() {
         }
 
     }, [latestFile]);
-
-    const handleSearch = useCallback(
-        async (query = searchQuery) => {
-            if (!query) {
-                toast.error("Please enter a serial number.");
-                return;
-            }
-
-            if (!latestFile) {
-                toast.error("No database found. Please upload database first.");
-                return;
-            }
-
-            try {
-                const row = latestFile.rows.find(
-                    (row) => row.pos_serial_number === query
-                );
-
-                if (row) {
-                    setSearchResults(row);
-                    setCondition(row.scanned_technical_condition);
-                    setScanWarehouse(row.scanned_outlet_whs_name);
-                    toast.success("Match found!");
-                } else {
-                    setSearchResults({
-                        pos_serial_number: query,
-                        outlet_whs_name: "",
-                        outlet_whs_address: "",
-                        pos_type: "",
-                        scanned_technical_condition: "",
-                        scanned_outlet_whs_name: "",
-                    });
-                    setCondition("");
-                    setScanWarehouse("");
-                    toast.info(
-                        'No match found. Click "Save" to add in database.'
-                    );
-                }
-            } catch (error) {
-                toast.error("Failed to perform search. Please try again.");
-            }
-        },
-        [latestFile, searchQuery]
-    );
-
-    const handleSave = async () => {
-        if (!searchResults) {
-            toast.error("No data to save.");
-            return;
-        }
-    
-        if (isAuthenticated) {
-            try {
-                const token = localStorage.getItem("token");
-                const response = await fetch(`${BASE_URL}/api/search/`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Token ${token}`,
-                    },
-                    body: JSON.stringify({
-                        qr_code: searchResults.pos_serial_number,
-                        file_id: latestFile.id,
-                        condition_data: condition,
-                        scan_warehouse_data: scanWarehouse,
-                    }),
-                });
-    
-                if (response.status === 200) {
-                    const data = await response.json();
-                    toast.success(data.message);
-    
-                    // Reset form fields after save
-                    setSearchQuery("");
-                    setSearchResults(null);
-                    setCondition("");
-                    setScanWarehouse("");
-    
-                    // Fetch the latest file again after saving
-                    const fetchLatestFile = async () => {
-                        try {
-                            const response = await fetch(`${BASE_URL}/api/upload/latest-file/`, {
-                                method: "GET",
-                                headers: {
-                                    Authorization: `Token ${token}`,
-                                },
-                            });
-    
-                            if (response.status === 200) {
-                                const data = await response.json();
-                                setLatestFile(data);
-                                toast.success("Database reloaded successfully.");
-                            }
-                        } catch (error) {
-                            toast.error("Failed to fetch latest database.");
-                        }
-                    };
-    
-                    fetchLatestFile();
-                }
-            } catch (error) {
-                console.error("Save error:", error);
-                toast.error("Failed to save changes. Please try again.");
-            }
-        }
-    };    
 
     // Show loading spinner while authentication state is being initialized
     if (isLoading) {
@@ -188,11 +207,13 @@ export default function SearchPage() {
         <div className="container">
             <h1>Assets search</h1>
             <div className="latest-file">
-                {latestFile && (
+                {latestFile && latestFile.latest_file_name ? (
                     <p>
                         Last uploaded database:{" "}
-                        <strong>{latestFile.name}</strong>
+                        <strong>{latestFile.latest_file_name}</strong>
                     </p>
+                ) : (
+                    <p>No database found. Please upload a database first.</p>
                 )}
             </div>
 

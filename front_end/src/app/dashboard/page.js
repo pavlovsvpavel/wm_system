@@ -13,7 +13,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.push('/login')
-            toast.error("You are not authenticated. Please log in.");
+            toast.info("You are not authenticated. Please log in.");
         }
     }, [isAuthenticated, isLoading]);
 
