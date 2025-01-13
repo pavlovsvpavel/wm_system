@@ -36,7 +36,7 @@ class UploadFileView(api_generic_views.CreateAPIView):
 
         try:
             with transaction.atomic():
-                uploaded_file = UploadedFile(name=file.name)
+                uploaded_file = UploadedFile(name=file.name, user=request.user)
 
                 try:
                     df = pd.read_excel(file)
@@ -57,6 +57,7 @@ class UploadFileView(api_generic_views.CreateAPIView):
                 row_objects = [
                     UploadedFileRowData(
                         file=uploaded_file,
+                        user=request.user,
                         pos_serial_number=str(row['POS SN']),
                         whs_outlet=str(row['WHS/Outlet']),
                         date_of_movement=str(row['Date of movement']),
