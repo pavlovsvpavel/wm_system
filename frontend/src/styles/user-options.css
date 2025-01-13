@@ -1,0 +1,56 @@
+.options-container {
+    display: flex;
+    width: 80%;
+    gap: 2em;
+}
+
+.options-container .section {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    flex: 1 0 50%;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    padding: 1em;
+    justify-content: space-between;
+}
+
+.options-container .section ul {
+    width: 100%;
+    padding-bottom: 1em;
+}
+
+.options-container .section li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1em;
+}
+
+.options-container h2 {
+    font-size: 1.5em;
+}
+
+.options-container input {
+    color: black;
+    border-radius: 5px;
+    padding: 0.8em;
+}
+
+.options-container .add-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+.options-container .btn {
+    background-color: #0070f3;
+    padding: 0.5em;
+    border-radius: 5px;
+}
+
+.options-container button:hover {
+    background-color: #005bb5;
+  }
