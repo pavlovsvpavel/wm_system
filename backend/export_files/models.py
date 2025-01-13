@@ -5,6 +5,7 @@ from upload_files.models import UploadedFileRowData
 
 class UploadedFileRowDataResource(resources.ModelResource):
     file_name = fields.Field(attribute='file_name', column_name='File Name')
+    user = fields.Field(attribute='user', column_name='User')
 
     class Meta:
         model = UploadedFileRowData
@@ -43,6 +44,7 @@ class UploadedFileRowDataResource(resources.ModelResource):
             'created_at',
             'updated_at',
             'file_name',
+            'user',
         ]
 
     def dehydrate_file_name(self, row):

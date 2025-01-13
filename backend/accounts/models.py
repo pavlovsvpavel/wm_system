@@ -33,3 +33,13 @@ class UserAccount(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
     USERNAME_FIELD = "username"
 
     objects = UserAccountManager()
+
+
+class UserAccountTechnicalCondition(models.Model):
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name="technical_conditions")
+    technical_condition = models.CharField(max_length=100, blank=True, null=True)
+
+
+class UserAccountWhsName(models.Model):
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name="whs_names")
+    whs_name = models.CharField(max_length=100, blank=True, null=True)
