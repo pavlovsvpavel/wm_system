@@ -26,7 +26,7 @@
   font-size: 1em;
   border: none;
   border-radius: 5px;
-  background-color: #0070f3;
+  background-color: var(--button-color);
   color: white;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -34,7 +34,7 @@
 }
 
 .login-register-button:hover {
-  background-color: #005bb5;
+  background-color: var(--button-color-hover);
 }
 
 .login-register-link {
@@ -43,7 +43,7 @@
 }
 
 .login-register-link a {
-  color: #0070f3;
+  color: var(--button-color);
   text-decoration: none;
 }
 
@@ -72,6 +72,6 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #0070f3;
+  color: var(--button-color);
   font-size: 1.5em;
 }

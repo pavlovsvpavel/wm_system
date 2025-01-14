@@ -7,8 +7,8 @@
     width: 100%;
     max-width: 500px;
     margin: 20px auto;
-    border: 2px solid #0070f3;
-    border-radius: 10px; /* Rounded corners */
+    border: 2px solid var(--button-color);
+    border-radius: 10px;
     overflow: hidden;
     position: relative;
     background-color: #000;
@@ -16,17 +16,18 @@
 
 /* Scanner buttons (if any) */
 #qr-reader button {
-    background-color: #0070f3;
+    background-color: var(--button-color);
     color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
     margin: 10px;
+    transition: background-color 0.3s ease;
 }
 
 #qr-reader button:hover {
-    background-color: #005bb5;
+    background-color: var(--button-color-hover);
 }
 
 .camera-container {
@@ -52,7 +53,7 @@
 }
 
 .torch-button.torch-on {
-    background-color: red; /* Red color when torch is on */
+    background-color: red;
 }
 
 .torch-button svg {
@@ -69,9 +70,10 @@
     text-align: center;
     min-height: 40px;
     color: #fff;
-    background-color: #0070f3;
+    background-color: var(--button-color);
     border-radius: 5px;
     margin-top: 5px;
+    transition: background-color 0.3s ease;
 }
 
 #qr-reader__dashboard #html5-qrcode-select-camera:disabled {

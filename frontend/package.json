@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "cross-env ENV=local next dev",
+    "local-build": "cross-env ENV=local next build",
+    "local-start": "cross-env ENV=local next start",
     "docker-dev": "cross-env ENV=dev next dev",
     "docker-build": "cross-env ENV=dev next build",
     "docker-start": "cross-env ENV=dev next start",

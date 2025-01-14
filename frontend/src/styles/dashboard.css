@@ -10,7 +10,12 @@
     font-size: 1em;
     border: none;
     border-radius: 5px;
-    background-color: #0070f3;
+    background-color: var(--button-color);
     color: white;
     cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+.dashboard-buttons button:hover {
+    background-color: var(--button-color-hover);
 }

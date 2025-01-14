@@ -46,11 +46,12 @@
 }
 
 .options-container .btn {
-    background-color: #0070f3;
+    background-color: var(--button-color);
     padding: 0.5em;
     border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .options-container button:hover {
-    background-color: #005bb5;
+    background-color: var(--button-color-hover);
   }

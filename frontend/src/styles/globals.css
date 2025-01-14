@@ -16,6 +16,8 @@
     --background: #000000;
     --text-color: #ffffff;
     --font-ubuntu: 'Ubuntu', sans-serif;
+    --button-color: #0070f3;
+    --button-color-hover: #155391;
 }
 
 *, *::before, *::after {
@@ -97,7 +99,7 @@ h6 {
 
 .spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left-color: #0070f3;
+    border-left-color: var(--button-color);
     border-radius: 50%;
     width: 40px;
     height: 40px;

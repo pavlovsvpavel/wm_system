@@ -49,7 +49,7 @@
 }
 
 .navigation ul li:hover {
-    color: #0070f3;
+    color: var(--button-color);
 }
 
 .navigation ul a,
@@ -63,39 +63,6 @@
     display: block;
     cursor: pointer;
 }
-
-/* .navigation ul a:after,
-.navigation ul a:before,
-.navigation ul button:after,
-.navigation ul button:before {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 2px;
-    background-color: #fff;
-    transition: all 0.5s ease-in-out;
-}
-
-.navigation ul a:after,
-.navigation ul button:after {
-    top: 0;
-    right: 0;
-    transform-origin: right;
-}
-
-.navigation ul a:before,
-.navigation ul button:before {
-    left: 0;
-    bottom: 0;
-    transform-origin: left;
-}
-
-.navigation ul a:hover::after,
-.navigation ul a:hover::before,
-.navigation ul button:hover::after,
-.navigation ul button:hover::before {
-    width: 100%;
-} */
 
 .navigation .menu-btn {
     filter: brightness(0) saturate(100%) invert(85%) sepia(1%) saturate(1107%) hue-rotate(353deg) brightness(117%) contrast(97%);
