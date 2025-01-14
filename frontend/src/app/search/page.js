@@ -10,7 +10,7 @@ import { useFile } from "../context/FileContext";
 export default function SearchPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState(null);
-    const [selectedCondition, setSelectedCondition] = useState("");
+    const [selectedConditions, setselectedConditions] = useState([]);
     const [conditions, setConditions] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState("");
     const [warehouses, setWarehouses] = useState([]);
@@ -30,7 +30,7 @@ export default function SearchPage() {
     useEffect(() => {
         if (isAuthenticated) {
             const token = localStorage.getItem("token");
-    
+
             // Fetch technical conditions with token in headers
             fetch(`${BASE_URL}/api/accounts/user/technical-conditions/`, {
                 headers: {
@@ -55,7 +55,7 @@ export default function SearchPage() {
                     console.error("Error fetching conditions:", error);
                     setConditions([]);
                 });
-    
+
             // Fetch warehouse names with token in headers
             fetch(`${BASE_URL}/api/accounts/user/whs-names/`, {
                 headers: {
@@ -158,7 +158,7 @@ export default function SearchPage() {
 
                 if (data.pos_serial_number) {
                     setSearchResults(data);
-                    setSelectedCondition(data.scanned_technical_condition || "");
+                    setselectedConditions([]);
                     setSelectedWarehouse(data.scanned_outlet_whs_name || "");
 
                     toast.success("Match found!");
@@ -172,7 +172,7 @@ export default function SearchPage() {
                         scanned_outlet_whs_name: "",
                     });
 
-                    setSelectedCondition("");
+                    setselectedConditions([]);
                     setSelectedWarehouse("");
 
                     toast.info('No match found. Click "Save" to add in the database.');
@@ -196,7 +196,7 @@ export default function SearchPage() {
         const payload = {
             latest_file_id: latestFile,
             pos_serial_number: searchResults.pos_serial_number,
-            scanned_technical_condition: selectedCondition,
+            scanned_technical_condition: selectedConditions.join(', '),
             scanned_outlet_whs_name: selectedWarehouse,
         };
 
@@ -204,8 +204,8 @@ export default function SearchPage() {
             try {
                 const token = localStorage.getItem("token");
 
-                if (!searchResults.pos_serial_number || !selectedCondition || !selectedWarehouse) {
-                    toast.error("Please fill condition and scanned warehouse fields.");
+                if (!searchResults.pos_serial_number || selectedConditions.length === 0 || !selectedWarehouse) {
+                    toast.error("Please fill both condition and scanned warehouse fields.");
                     return;
                 }
 
@@ -225,7 +225,7 @@ export default function SearchPage() {
                     // Reset form fields after save
                     setSearchQuery("");
                     setSearchResults(null);
-                    setSelectedCondition("");
+                    setselectedConditions([]);
                     setSelectedWarehouse("");
                 } else {
                     // Handle non-200 responses
@@ -250,6 +250,31 @@ export default function SearchPage() {
         }
 
     }, [latestFile]);
+
+    const handleConditionChange = (condition) => {
+        setselectedConditions((prev) =>
+            prev.includes(condition)
+                ? prev.filter((item) => item !== condition)
+                : [...prev, condition]
+        );
+    };
+
+    const [isOpen, setIsOpen] = useState(false);
+    const toggleDropdown = () => setIsOpen((prev) => !prev);
+
+    const handleOutsideClick = (e) => {
+        if (e.target.closest('.dropdown') === null) {
+            setIsOpen(false);
+        }
+    };
+
+    // Listen for clicks outside the dropdown to close it
+    useEffect(() => {
+        document.addEventListener('click', handleOutsideClick);
+        return () => {
+            document.removeEventListener('click', handleOutsideClick);
+        };
+    }, []);
 
     // Show loading spinner while authentication state is being initialized
     if (isLoading) {
@@ -308,7 +333,7 @@ export default function SearchPage() {
                             <p>{searchResults.outlet_whs_address}</p>
                         </li>
                         <li>
-                            <p>Technical condition:</p>
+                            <p>Technical conditions:</p>
                             <p>{searchResults.scanned_technical_condition}</p>
                         </li>
                         <li>
@@ -321,19 +346,30 @@ export default function SearchPage() {
 
             {searchResults && (
                 <div className="selection-fields">
-                    <select
-                        value={selectedCondition}
-                        onChange={(e) => setSelectedCondition(e.target.value)}
-                    >
-                        <option value="">Select Condition</option>
-                        {Array.isArray(conditions) && conditions.map((conditionItem, index) => (
-                            <option key={index} value={conditionItem.technical_condition}>
-                                {conditionItem.technical_condition}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="conditions-dropdown">
+                        <div className="dropdown" onClick={toggleDropdown}>
+                            <button className="dropdown-btn">
+                                {selectedConditions.length ? selectedConditions.join(', ') : "Select Conditions"}
+                            </button>
+                            {isOpen && (
+                                <ul className="dropdown-content" onClick={(e) => e.stopPropagation()}>
+                                    {conditions.map((condition, index) => (
+                                        <li key={index} className="dropdown-item">
+                                            <input
+                                                type="checkbox"
+                                                value={condition.technical_condition}
+                                                checked={selectedConditions.includes(condition.technical_condition)}
+                                                onChange={() => handleConditionChange(condition.technical_condition)}
+                                            />
+                                            <p>{condition.technical_condition}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
 
-                    <select
+                    <select className="warehouse-dropdown"
                         value={selectedWarehouse}
                         onChange={(e) => setSelectedWarehouse(e.target.value)}
                     >
