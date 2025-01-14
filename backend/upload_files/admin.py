@@ -17,6 +17,7 @@ class UploadedFileRowDataAdmin(ExportMixin, admin.ModelAdmin):
         'created_at', 'updated_at', 'user',
     )
 
+    search_fields = ('pos_serial_number',)
+    search_help_text = "Search by pos serial number"
     ordering = ('-file__upload_date',)
-
     list_filter = ('file__name',)
