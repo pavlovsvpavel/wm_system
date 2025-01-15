@@ -307,8 +307,8 @@ export default function SearchPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button onClick={() => handleSearch()}>Search</button>
-                <button onClick={() => router.push("/qr-scanner")}>
+                <button className="btn" onClick={() => handleSearch()}>Search</button>
+                <button className="btn" onClick={() => router.push("/qr-scanner")}>
                     Scan QR Code
                 </button>
             </div>
@@ -354,12 +354,18 @@ export default function SearchPage() {
                             {isOpen && (
                                 <ul className="dropdown-content" onClick={(e) => e.stopPropagation()}>
                                     {conditions.map((condition, index) => (
-                                        <li key={index} className="dropdown-item">
+                                        <li 
+                                        key={index} 
+                                        className={`dropdown-item ${selectedConditions.includes(condition.technical_condition) ? 'selected' : ''}`}
+                                        onClick={() => handleConditionChange(condition.technical_condition)}
+                                        >
                                             <input
                                                 type="checkbox"
                                                 value={condition.technical_condition}
                                                 checked={selectedConditions.includes(condition.technical_condition)}
                                                 onChange={() => handleConditionChange(condition.technical_condition)}
+
+                                                className="hidden-checkbox"
                                             />
                                             <p>{condition.technical_condition}</p>
                                         </li>
@@ -385,7 +391,7 @@ export default function SearchPage() {
 
             {searchResults && (
                 <div className="save-button">
-                    <button onClick={handleSave}>Save</button>
+                    <button className="btn" onClick={handleSave}>Save</button>
                 </div>
             )}
         </div>

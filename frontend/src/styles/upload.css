@@ -10,8 +10,7 @@ h1 {
 
 /* Drag-and-Drop Area */
 .dropzone {
-  border: 2px dashed #fff;
-  border-radius: 10px;
+  border: 6px dashed #fff;
   padding: 2em;
   text-align: center;
   cursor: pointer;

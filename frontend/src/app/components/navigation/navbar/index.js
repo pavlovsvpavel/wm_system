@@ -82,7 +82,7 @@ const Navigation = () => {
                                         </Link>
                                     </li>
                                 </ul>
-                                <button className="btn" style={{ color: "#000" }} onClick={logout}>
+                                <button className="nav-btn" style={{ color: "#000" }} onClick={logout}>
                                     Log out
                                 </button>
                             </div>
