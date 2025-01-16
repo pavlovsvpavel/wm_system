@@ -11,6 +11,7 @@
 @import url('login-register.css');
 @import url('navbar.css');
 @import url('user-options.css');
+@import url('dropdown.css');
 
 :root {
     --background: #000000;

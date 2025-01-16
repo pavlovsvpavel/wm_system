@@ -6,17 +6,20 @@ import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../context/AuthContext';
 import { useFile } from "../context/FileContext";
+import { CButton, CModal, CModalHeader, CModalTitle, CModalBody, CFormCheck } from '@coreui/react'
 
 export default function SearchPage() {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState(null);
-    const [selectedConditions, setselectedConditions] = useState([]);
+    const [selectedConditions, setSelectedConditions] = useState([]);
     const [conditions, setConditions] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState("");
     const [warehouses, setWarehouses] = useState([]);
-    const router = useRouter();
     const { isAuthenticated, isLoading } = useAuth();
     const { latestFile, setLatestFile } = useFile();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -158,7 +161,7 @@ export default function SearchPage() {
 
                 if (data.pos_serial_number) {
                     setSearchResults(data);
-                    setselectedConditions([]);
+                    setSelectedConditions([]);
                     setSelectedWarehouse(data.scanned_outlet_whs_name || "");
 
                     toast.success("Match found!");
@@ -172,7 +175,7 @@ export default function SearchPage() {
                         scanned_outlet_whs_name: "",
                     });
 
-                    setselectedConditions([]);
+                    setSelectedConditions([]);
                     setSelectedWarehouse("");
 
                     toast.info('No match found. Click "Save" to add in the database.');
@@ -225,7 +228,7 @@ export default function SearchPage() {
                     // Reset form fields after save
                     setSearchQuery("");
                     setSearchResults(null);
-                    setselectedConditions([]);
+                    setSelectedConditions([]);
                     setSelectedWarehouse("");
                 } else {
                     // Handle non-200 responses
@@ -251,30 +254,36 @@ export default function SearchPage() {
 
     }, [latestFile]);
 
+    
+
     const handleConditionChange = (condition) => {
-        setselectedConditions((prev) =>
-            prev.includes(condition)
-                ? prev.filter((item) => item !== condition)
-                : [...prev, condition]
-        );
+        const updatedConditions = selectedConditions.includes(condition)
+            ? selectedConditions.filter((item) => item !== condition)
+            : [...selectedConditions, condition];
+        setSelectedConditions(updatedConditions);
     };
 
-    const [isOpen, setIsOpen] = useState(false);
-    const toggleDropdown = () => setIsOpen((prev) => !prev);
-
-    const handleOutsideClick = (e) => {
-        if (e.target.closest('.dropdown') === null) {
-            setIsOpen(false);
-        }
+    const openModal = () => {
+        setIsModalOpen(true);
     };
 
-    // Listen for clicks outside the dropdown to close it
-    useEffect(() => {
-        document.addEventListener('click', handleOutsideClick);
-        return () => {
-            document.removeEventListener('click', handleOutsideClick);
-        };
-    }, []);
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+
+    const handleWarehouseChange = (warehouse) => {
+        setSelectedWarehouse(warehouse);
+        setIsWarehouseModalOpen(false);
+    };
+
+    const openWarehouseModal = () => {
+        setIsWarehouseModalOpen(true);
+    };
+
+    const closeWarehouseModal = () => {
+        setIsWarehouseModalOpen(false);
+    };
 
     // Show loading spinner while authentication state is being initialized
     if (isLoading) {
@@ -347,51 +356,75 @@ export default function SearchPage() {
             {searchResults && (
                 <div className="selection-fields">
                     <div className="conditions-dropdown">
-                        <div className="dropdown" onClick={toggleDropdown}>
-                            <button className="dropdown-btn">
-                                {selectedConditions.length ? selectedConditions.join(', ') : "Select Conditions"}
-                            </button>
-                            {isOpen && (
-                                <ul className="dropdown-content" onClick={(e) => e.stopPropagation()}>
-                                    {conditions.map((condition, index) => (
-                                        <li 
-                                        key={index} 
-                                        className={`dropdown-item ${selectedConditions.includes(condition.technical_condition) ? 'selected' : ''}`}
-                                        onClick={() => handleConditionChange(condition.technical_condition)}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                value={condition.technical_condition}
-                                                checked={selectedConditions.includes(condition.technical_condition)}
-                                                onChange={() => handleConditionChange(condition.technical_condition)}
+                        <CButton className="dropdown-menu-btn" onClick={openModal}>
+                            {selectedConditions.length ? selectedConditions.join(', ') : 'Select Conditions'}
+                        </CButton>
 
-                                                className="hidden-checkbox"
-                                            />
-                                            <p>{condition.technical_condition}</p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
+                        <CModal
+                            visible={isModalOpen}
+                            onClose={closeModal}
+                            alignment="center"
+                            backdrop={true}
+                            className="custom-modal"
+                        >
+                            <CModalHeader>
+                                <CModalTitle>Select Conditions</CModalTitle>
+                            </CModalHeader>
+                            <CModalBody className="modal-body-scrollable">
+                                {conditions.map((condition, index) => (
+                                    <div key={index} className="dropdown-item">
+                                        <CFormCheck
+                                            id={`condition-${index}`}
+                                            label={condition.technical_condition}
+                                            checked={selectedConditions.includes(condition.technical_condition)}
+                                            onChange={() => handleConditionChange(condition.technical_condition)}
+                                        />
+                                    </div>
+                                ))}
+                            </CModalBody>
+                        </CModal>
                     </div>
 
-                    <select className="warehouse-dropdown"
-                        value={selectedWarehouse}
-                        onChange={(e) => setSelectedWarehouse(e.target.value)}
-                    >
-                        <option value="">Select Warehouse</option>
-                        {Array.isArray(warehouses) && warehouses.map((warehouse, index) => (
-                            <option key={index} value={warehouse.whs_name}>
-                                {warehouse.whs_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
+                    <div className="warehouse-dropdown">
+                        <CButton className="dropdown-menu-btn" onClick={openWarehouseModal}>
+                            {selectedWarehouse || 'Select Warehouse'}
+                        </CButton>
 
-            {searchResults && (
-                <div className="save-button">
-                    <button className="btn" onClick={handleSave}>Save</button>
+                        <CModal
+                            visible={isWarehouseModalOpen}
+                            onClose={closeWarehouseModal}
+                            alignment="center"
+                            backdrop={true}
+                            className="custom-modal"
+                        >
+                            <CModalHeader>
+                                <CModalTitle>Select Warehouse</CModalTitle>
+                            </CModalHeader>
+                            <CModalBody className="modal-body-scrollable">
+                                <div
+                                    className="dropdown-item"
+                                    onClick={() => handleWarehouseChange('')}
+                                >
+                                    {/* Select Warehouse */}
+                                </div>
+
+                                {Array.isArray(warehouses) &&
+                                    warehouses.map((warehouse, index) => (
+                                        <div
+                                            key={index}
+                                            className="dropdown-item"
+                                            onClick={() => handleWarehouseChange(warehouse.whs_name)}
+                                        >
+                                            {warehouse.whs_name}
+                                        </div>
+                                    ))}
+                            </CModalBody>
+                        </CModal>
+                    </div>
+
+                    <div className="save-button">
+                        <button className="btn" onClick={handleSave}>Save</button>
+                    </div>
                 </div>
             )}
         </div>
