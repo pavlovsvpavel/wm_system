@@ -2,9 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import "../../../../styles/globals.css"
+import "../../../styles/globals.css"
 import { useEffect } from "react";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 
 const Navigation = () => {

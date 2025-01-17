@@ -1,5 +1,6 @@
 .options-container {
     display: flex;
+    justify-content: center;
     width: 80%;
     gap: 2em;
 }
@@ -16,7 +17,10 @@
     justify-content: space-between;
 }
 
-.options-container .section ul {
+.options-container .section .data {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
     width: 100%;
     padding-bottom: 1em;
 }
@@ -25,7 +29,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 1em;
+    padding: 0.5em 1em;
+    border: 1px solid #fff;
+    border-radius: 5px;
 }
 
 .options-container h2 {
@@ -38,7 +44,7 @@
     padding: 0.8em;
 }
 
-.options-container .add-option {
+.options-container .add-data {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,4 +53,8 @@
 
 .options-container button:hover {
     background-color: var(--button-color-hover);
-  }
+}
+
+.options-container .delete-icon {
+    color: var(--color-pepsi-red);
+}

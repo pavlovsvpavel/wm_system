@@ -85,7 +85,7 @@
 
 .search-results li p:last-of-type {
     font-weight: bold;
-    color: #ff1400;
+    color: var(--color-pepsi-red);
 }
 
 @media (max-width: 768px) {

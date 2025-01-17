@@ -4,7 +4,7 @@ import { Ubuntu } from "next/font/google";
 import "../styles/globals.css";
 import ToastContainer, { toastConfig } from "../utils/toastConfig";
 import "react-toastify/dist/ReactToastify.css";
-import Navigation from "./components/navigation/navbar";
+import Navigation from "./components/navigation";
 import { usePathname } from "next/navigation";
 import { AuthProvider } from './context/AuthContext';
 import { FileProvider } from "./context/FileContext";

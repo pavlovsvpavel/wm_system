@@ -1,27 +1,6 @@
-'use client';
-
 import Link from "next/link";
-import { useEffect } from "react";
-import { useAuth } from './context/AuthContext';
-import { toast } from "react-toastify";
 
 export default function Home() {
-    const { isAuthenticated, isLoading } = useAuth();
-
-    useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
-            toast.info("You are not authenticated. Please log in.");
-        }
-    }, [isAuthenticated, isLoading]);
-
-    if (isLoading) {
-        return (
-            <div className="loading-spinner">
-                <p>Loading</p>
-                <div className="spinner"></div>
-            </div>
-        );
-    }
 
     return (
         <div className="container">

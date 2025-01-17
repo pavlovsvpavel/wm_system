@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAuth } from '../context/AuthContext';
+import { useFetchFiles } from '../hooks/useFetchFiles';
+import { useFile } from "../context/FileContext";
+import AuthWrapper from "../components/auth/authWrapper";
 
 export default function UploadFile() {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -11,31 +14,16 @@ export default function UploadFile() {
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const router = useRouter();
-    const { isAuthenticated, isLoading } = useAuth();
-    
+    const { isAuthenticated, isLoading, logout } = useAuth();
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+    const { files: uploadedFiles } = useFetchFiles(isAuthenticated, BASE_URL);
 
-    useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
-            router.push('/login')
-            toast.info("You are not authenticated. Please log in.");
-        }
-    }, [isAuthenticated, isLoading]);
-
-    if (isLoading) {
-        return (
-            <div className="loading-spinner">
-                <p>Loading</p>
-                <div className="spinner"></div>
-            </div>
-        );
-    }
+    const { setLatestFile } = useFile();
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setSelectedFile(file);
-            setError("");
+            validateFile(file);
         }
     };
 
@@ -45,6 +33,27 @@ export default function UploadFile() {
 
         const file = event.dataTransfer.files[0];
         if (file) {
+            validateFile(file);
+        }
+    };
+
+    // Validate the file type and check for duplicate names
+    const validateFile = (file) => {
+        if (!file.name.toLowerCase().endsWith(".xlsx") && !file.name.toLowerCase().endsWith(".xls")) {
+            setError("Invalid file type. Only Excel files are allowed.");
+            setSelectedFile(null);
+            return;
+        }
+
+        // Check if a file with the same name already exists
+        const isDuplicate = uploadedFiles.some(
+            (uploadedFile) => uploadedFile.name === file.name
+        );
+
+        if (isDuplicate) {
+            setError("A file with the same name already exists. Please rename the file or choose a different one.");
+            setSelectedFile(null);
+        } else {
             setSelectedFile(file);
             setError("");
         }
@@ -65,27 +74,14 @@ export default function UploadFile() {
             return;
         }
 
-        if (
-            !selectedFile.name.toLowerCase().endsWith(".xlsx") &&
-            !selectedFile.name.toLowerCase().endsWith(".xls")
-        ) {
-            setError("Invalid file type. Only Excel files are allowed.");
-            return;
-        }
-
         setIsUploading(true);
         setError("");
 
         try {
             const formData = new FormData();
             formData.append("file", selectedFile);
-    
+
             const token = localStorage.getItem("token");
-            if (!token) {
-                setError("Token not found.");
-                return;
-            }
-    
             const response = await fetch(`${BASE_URL}/api/files/upload-file/`, {
                 method: "POST",
                 headers: {
@@ -93,10 +89,16 @@ export default function UploadFile() {
                 },
                 body: formData,
             });
-    
+
             if (response.status === 201) {
                 toast.success("File uploaded successfully!");
                 router.push("/dashboard");
+                sessionStorage.removeItem("latest_file_id");
+                sessionStorage.removeItem("latest_file_name");
+                setLatestFile(null);
+            } else if (response.status === 401) {
+                logout();
+                toast.error("Your session has expired. Please log in again.");
             } else {
                 const errorData = await response.json();
                 setError(errorData?.error || "Upload failed. Please try again.");
@@ -110,43 +112,45 @@ export default function UploadFile() {
     };
 
     return (
-        <div className="container">
-            <h1>Upload File</h1>
-            {error && <p className="error-message">{error}</p>}
+        <AuthWrapper>
+            <div className="container">
+                <h1>Upload File</h1>
+                {error && <p className="error-message">{error}</p>}
 
-            <div
-                className={`dropzone ${isDragging ? "dragging" : ""}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-            >
-                <p>Drag and drop a file here, or</p>
-                <div className="file-input-container">
-                    <input
-                        type="file"
-                        id="file"
-                        accept=".xlsx, .xls"
-                        onChange={handleFileChange}
-                    />
-                    <label htmlFor="file" className="file-label">
-                        Choose a file
-                    </label>
+                <div
+                    className={`dropzone ${isDragging ? "dragging" : ""}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                >
+                    <p>Drag and drop a file here, or</p>
+                    <div className="file-input-container">
+                        <input
+                            type="file"
+                            id="file"
+                            accept=".xlsx, .xls"
+                            onChange={handleFileChange}
+                        />
+                        <label htmlFor="file" className="file-label">
+                            Choose a file
+                        </label>
+                    </div>
                 </div>
+
+                {selectedFile && (
+                    <p className="selected-file">
+                        Selected file: {selectedFile.name}
+                    </p>
+                )}
+
+                <button
+                    onClick={handleUpload}
+                    disabled={isUploading}
+                    className="upload-button"
+                >
+                    {isUploading ? <div className="spinner"></div> : "Upload"}
+                </button>
             </div>
-
-            {selectedFile && (
-                <p className="selected-file">
-                    Selected file: {selectedFile.name}
-                </p>
-            )}
-
-            <button
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="upload-button"
-            >
-                {isUploading ? <div className="spinner"></div> : "Upload"}
-            </button>
-        </div>
+        </AuthWrapper>
     );
 }
