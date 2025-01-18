@@ -46,7 +46,8 @@ class UserAccountTechnicalConditionView(api_generic_views.RetrieveUpdateDestroyA
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get(self, request, *args, **kwargs):
-        conditions = UserAccountTechnicalCondition.objects.all()
+        filtered_queryset = UserAccountTechnicalCondition.objects.filter(user=self.request.user)
+        conditions = filtered_queryset
         serializer = self.serializer_class(conditions, many=True)
 
         return Response(serializer.data)
@@ -55,7 +56,7 @@ class UserAccountTechnicalConditionView(api_generic_views.RetrieveUpdateDestroyA
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -78,7 +79,8 @@ class UserAccountWHSNameView(api_generic_views.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get(self, request, *args, **kwargs):
-        warehouses = self.get_queryset()
+        filtered_queryset = UserAccountWhsName.objects.filter(user=self.request.user)
+        warehouses = filtered_queryset
         serializer = self.serializer_class(warehouses, many=True)
 
         return Response(serializer.data)
@@ -86,8 +88,9 @@ class UserAccountWHSNameView(api_generic_views.RetrieveUpdateDestroyAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):

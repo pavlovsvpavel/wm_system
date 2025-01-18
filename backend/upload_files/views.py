@@ -17,12 +17,10 @@ class UploadFileView(api_generic_views.CreateAPIView):
     queryset = UploadedFile.objects.all()
     serializer_class = UploadedFileSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
-
     parser_classes = [MultiPartParser, FormParser]
 
-    existing_file_names = queryset.values_list('name', flat=True)
-
     def post(self, request, *args, **kwargs):
+        filtered_queryset = UploadedFile.objects.filter(user=request.user)
         file = request.FILES.get('file')
 
         if not file:
@@ -31,8 +29,10 @@ class UploadFileView(api_generic_views.CreateAPIView):
         if not file.name.lower().endswith(('.xlsx', '.xls')):
             return Response({'error': 'Invalid file type. Only Excel files are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if file.name in self.existing_file_names :
-            return Response({'error': 'File with this name already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Check for duplicate file names for the current user
+        if filtered_queryset.filter(name=file.name).exists():
+            return Response({'error': 'A file with this name already exists for this user.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             with transaction.atomic():
@@ -105,7 +105,6 @@ class UploadFileView(api_generic_views.CreateAPIView):
             return Response({'error': f"Unexpected error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class ListUploadedFilesView(api_generic_views.ListAPIView):
     queryset = UploadedFile.objects.all()
     serializer_class = ListUploadedFilesSerializer
@@ -113,7 +112,8 @@ class ListUploadedFilesView(api_generic_views.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            uploaded_files = self.get_queryset()
+            filtered_queryset = self.queryset.filter(user=request.user)
+            uploaded_files = filtered_queryset
 
             if not uploaded_files.exists():
                 return Response(
@@ -128,13 +128,14 @@ class ListUploadedFilesView(api_generic_views.ListAPIView):
 
 
 class RetrieveLatestFileIdView(api_generic_views.RetrieveAPIView):
+    queryset = UploadedFile.objects.all()
     serializer_class = UploadedFileSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
 
     def get(self, request, *args, **kwargs):
         try:
-            # Fetch the latest uploaded file id based on upload_date
-            latest_file = UploadedFile.objects.order_by('-upload_date').first()
+            filtered_queryset = self.queryset.filter(user=request.user)
+            latest_file = filtered_queryset.order_by('-upload_date').first()
 
             if latest_file:
                 latest_file_id = latest_file.id

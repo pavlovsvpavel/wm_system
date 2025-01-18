@@ -33,24 +33,18 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserAccountTechnicalConditionSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField()  # Explicitly define user_id
-
     class Meta:
         model = UserAccountTechnicalCondition
-        fields = ['id', 'technical_condition', 'user_id']
+        fields = ['id', 'technical_condition']
 
     def create(self, validated_data):
-        # Ensure user_id is passed to the model
         return UserAccountTechnicalCondition.objects.create(**validated_data)
 
 
 class UserAccountWhsNameSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField()  # Explicitly define user_id
-
     class Meta:
         model = UserAccountWhsName
-        fields = ['id', 'whs_name', 'user_id']
+        fields = ['id', 'whs_name']
 
     def create(self, validated_data):
-        # Ensure user_id is passed to the model
         return UserAccountWhsName.objects.create(**validated_data)

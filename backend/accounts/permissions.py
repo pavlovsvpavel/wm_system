@@ -6,5 +6,4 @@ class IsOwnerPermission(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # return obj.owner == request.user
         return getattr(obj, "user", None) == request.user

@@ -19,6 +19,8 @@ class QRCodeSearchView(api_generic_views.RetrieveAPIView):
         request: Request = self.request
         scanned_pos_serial_number = request.query_params.get('scanned_pos_serial_number')
         latest_file_id = request.query_params.get('latest_file_id')
+        # user_id = request.query_params.get('user_id')
+        user = request.user
 
         if not latest_file_id:
             latest_file_id = request.session.get('latest_file_id')
@@ -29,7 +31,8 @@ class QRCodeSearchView(api_generic_views.RetrieveAPIView):
 
         row = (UploadedFileRowData.objects.filter(
             file_id=latest_file_id,
-            pos_serial_number=scanned_pos_serial_number
+            pos_serial_number=scanned_pos_serial_number,
+            user=user,
         ).first())
 
         return row

@@ -13,7 +13,7 @@ class UploadedFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UploadedFile
-        fields = ['id', 'name', 'upload_date', 'rows']
+        fields = ['id', 'name', 'upload_date', 'rows', 'user']
 
 
 class ListUploadedFilesSerializer(serializers.ModelSerializer):
