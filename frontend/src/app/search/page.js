@@ -16,7 +16,7 @@ export default function SearchPage() {
     const [searchResults, setSearchResults] = useState(null);
     const [selectedConditions, setSelectedConditions] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState("");
-    const { isAuthenticated, isLoading, logout } = useAuth();
+    const { isAuthenticated } = useAuth();
     const { latestFile, setLatestFile } = useFile();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
@@ -67,7 +67,7 @@ export default function SearchPage() {
             const latestFile = sessionStorage.getItem('latest_file_id');
 
             if (!query) {
-                toast.error("Please enter a serial number or scan a QR Code.");
+                toast.warning("Please enter a serial number or scan a QR Code.");
                 return;
             }
 
@@ -76,13 +76,9 @@ export default function SearchPage() {
                 return;
             }
 
-            if (!isAuthenticated) {
-                toast.info("You are not authenticated. Please log in.");
-                return;
-            }
-
             try {
                 const token = localStorage.getItem("token");
+                
                 const response = await fetch(
                     `${BASE_URL}/api/db/search/?scanned_pos_serial_number=${query}&latest_file_id=${latestFile}`,
                     {
@@ -145,7 +141,7 @@ export default function SearchPage() {
             const token = localStorage.getItem("token");
 
             if (!searchResults.pos_serial_number || selectedConditions.length === 0 || !selectedWarehouse) {
-                toast.error("Please fill both condition and scanned warehouse fields.");
+                toast.warning("Please fill both condition and scanned warehouse fields.");
                 return;
             }
 
@@ -225,7 +221,7 @@ export default function SearchPage() {
     return (
         <AuthWrapper>
             <div className="container">
-                <h1>Assets search</h1>
+                <h1>Search in database</h1>
                 <div className="latest-file">
                     {latestFile && latestFile.latest_file_name ? (
                         <p>

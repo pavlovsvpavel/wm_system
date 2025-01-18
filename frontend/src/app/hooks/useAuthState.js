@@ -65,14 +65,10 @@ export function useAuthState() {
     useEffect(() => {
         if (isLoading) return;
     
-        console.log("useAuthState - Current route:", pathname);
-        console.log("useAuthState - Is authenticated:", isAuthenticated);
-    
         if (!isAuthenticated && !publicRoutes.includes(pathname)) {
             if (pathname !== '/') {
-                console.log("useAuthState - Redirecting to /login");
                 router.push('/login');
-                toast.info("You are not authenticated. Please log in.");
+                toast.warning("You are not authenticated. Please log in.");
             }
         }
     }, [isAuthenticated, isLoading, pathname, router]);
@@ -86,12 +82,10 @@ export function useAuthState() {
     };
 
     const logout = () => {
-        console.log("Logout is called");
         safeRemoveLocalStorage("token");
         safeRemoveLocalStorage("user");
         sessionStorage.removeItem("latest_file_id");
         sessionStorage.removeItem("latest_file_name");
-        console.log("Redirecting to /");
         window.location.href = '/'; // Force a full page reload
     };
 

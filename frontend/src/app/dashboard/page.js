@@ -21,13 +21,13 @@ export default function Dashboard() {
                 <h1>Dashboard</h1>
                 <div className="dashboard-buttons">
                     <button onClick={() => router.push("/upload")}>
-                        Upload File
+                        Upload database
                     </button>
                     <button onClick={() => router.push("/export")}>
-                        Export File
+                        Export database
                     </button>
                     <button onClick={() => router.push("/search")}>
-                        Search Database
+                        Search in database
                     </button>
                     <button onClick={() => router.push("/user-options")}>
                         Settings

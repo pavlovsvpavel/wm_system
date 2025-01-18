@@ -9,7 +9,7 @@ import useConditionsAndWarehousesData from '../hooks/useConditionsAndWarehousesD
 import AuthWrapper from "../components/auth/authWrapper";
 
 export default function UserOptions() {
-    const { isAuthenticated, isLoading, user } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [newCondition, setNewCondition] = useState("");
     const [newWarehouse, setNewWarehouse] = useState("");
 
@@ -26,31 +26,21 @@ export default function UserOptions() {
 
     const handleAddCondition = async () => {
         if (!newCondition.trim()) {
-            toast.warn("Condition cannot be empty");
+            toast.warning("Condition cannot be empty");
             return;
         }
 
-        if (!user) {
-            toast.error("User id not found. Please log out and log in again");
-            return;
-        }
-
-        await addCondition(newCondition, user.id);
+        await addCondition(newCondition);
         setNewCondition("");
     };
 
     const handleAddWarehouse = async () => {
         if (!newWarehouse.trim()) {
-            toast.warn("Warehouse name cannot be empty.");
+            toast.warning("Warehouse name cannot be empty.");
             return;
         }
 
-        if (!user) {
-            toast.error("User id not found. Please log out and log in again");
-            return;
-        }
-
-        await addWarehouse(newWarehouse, user.id);
+        await addWarehouse(newWarehouse);
         setNewWarehouse("");
     };
 
@@ -85,7 +75,6 @@ export default function UserOptions() {
                             />
                             <button className="btn"
                                 onClick={handleAddCondition}
-                                disabled={!user}
                             >
                                 Add Condition
                             </button>
@@ -110,7 +99,6 @@ export default function UserOptions() {
                             />
                             <button className="btn"
                                 onClick={handleAddWarehouse}
-                                disabled={!user}
                             >
                                 Add Warehouse
                             </button>

@@ -30,10 +30,6 @@ export function useFetchFiles(isAuthenticated, BASE_URL) {
                 } else if (response.status === 204) {
                     toast.info("No uploaded databases.");
                     setFiles([]);
-                } else if (response.status === 401) {
-                    // Handle unauthorized response
-                    logout();
-                    toast.error("Your session has expired. Please log in again.");
                 } else {
                     throw new Error("Failed to fetch databases.");
                 }

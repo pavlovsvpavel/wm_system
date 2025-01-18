@@ -20,7 +20,7 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!username || !password) {
-            setError("Please enter both username and password.");
+            toast.warning("Please enter both username and password.");
             return;
         }
     
@@ -38,9 +38,9 @@ export default function LoginScreen() {
     
             if (!response.ok) {
                 if (response.status === 400) {
-                    setError("Invalid username or password.");
+                    toast.error("Invalid username or password.");
                 } else {
-                    setError("An error occurred. Please try again.");
+                    toast.error("An error occurred. Please try again.");
                 }
                 return;
             }
@@ -48,7 +48,7 @@ export default function LoginScreen() {
             const data = await response.json();
     
             if (!data.token) {
-                setError("Invalid username or password.");
+                setError("Invalid token.");
                 return;
             }
     

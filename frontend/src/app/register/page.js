@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from 'next/link';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
@@ -18,12 +20,12 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
-      setError('Please fill in all fields.');
+      toast.warning('Please fill in all fields.');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      toast.error('Passwords do not match.');
       return;
     }
 
@@ -40,13 +42,13 @@ export default function RegisterScreen() {
       });
 
       if (response.status === 201) {
+        toast.success('Registration successful.');
         router.push('/login');
       } else {
         const errorData = await response.json()
         setError(errorData?.username || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      console.error('Registration error:', error);
       setError('An error occurred. Please try again.');
     }
   };

@@ -10,7 +10,7 @@ import AuthWrapper from "../components/auth/authWrapper";
 export default function ExportFile() {
     const [selectedFileId, setSelectedFileId] = useState(null);
     const [isExporting, setIsExporting] = useState(false);
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated } = useAuth();
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
     const { files } = useFetchFiles(isAuthenticated, BASE_URL);
 
@@ -77,7 +77,7 @@ export default function ExportFile() {
     return (
         <AuthWrapper>
             <div className="container">
-                <h1>Export Database</h1>
+                <h1>Export database</h1>
 
                 <div className="file-selection">
                     <label htmlFor="file-select">
@@ -87,7 +87,7 @@ export default function ExportFile() {
                         id="file-select"
                         value={selectedFileId || ""}
                         onChange={handleFileChange}
-                        disabled={isLoading}
+                        disabled={isExporting}
                     >
                         <option value="">-- Select a database --</option>
                         {files.map((file) => (

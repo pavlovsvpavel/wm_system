@@ -1,7 +1,7 @@
 .dashboard-buttons {
     display: flex;
     flex-direction: column;
-
+    gap: 2em;
 }
 
 .dashboard-buttons button {

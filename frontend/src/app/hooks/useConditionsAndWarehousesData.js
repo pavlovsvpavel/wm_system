@@ -42,18 +42,18 @@ const useFetchConditionsAndWarehouses = (isAuthenticated, BASE_URL) => {
     }, [isAuthenticated, BASE_URL]);
 
     // Function to add a new condition
-    const addCondition = async (newCondition, userId) => {
+    const addCondition = async (newCondition) => {
         try {
+            const token = localStorage.getItem("token");
             const payload = {
                 technical_condition: newCondition,
-                user_id: userId,
             };
 
             const response = await fetch(`${BASE_URL}/api/accounts/user/technical-conditions/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Token ${localStorage.getItem("token")}`,
+                    "Authorization": `Token ${token}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -74,10 +74,11 @@ const useFetchConditionsAndWarehouses = (isAuthenticated, BASE_URL) => {
     // Function to delete a condition
     const deleteCondition = async (id) => {
         try {
+            const token = localStorage.getItem("token");
             const response = await fetch(`${BASE_URL}/api/accounts/user/technical-conditions/${id}/`, {
                 method: "DELETE",
                 headers: {
-                    "Authorization": `Token ${localStorage.getItem("token")}`,
+                    "Authorization": `Token ${token}`,
                 },
             });
 
@@ -94,18 +95,18 @@ const useFetchConditionsAndWarehouses = (isAuthenticated, BASE_URL) => {
     };
 
     // Function to add a new warehouse
-    const addWarehouse = async (newWarehouse, userId) => {
+    const addWarehouse = async (newWarehouse) => {
         try {
+            const token = localStorage.getItem("token");
             const payload = {
                 whs_name: newWarehouse,
-                user_id: userId,
             };
 
             const response = await fetch(`${BASE_URL}/api/accounts/user/whs-names/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Token ${localStorage.getItem("token")}`,
+                    "Authorization": `Token ${token}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -126,10 +127,11 @@ const useFetchConditionsAndWarehouses = (isAuthenticated, BASE_URL) => {
     // Function to delete a warehouse
     const deleteWarehouse = async (id) => {
         try {
+            const token = localStorage.getItem("token");
             const response = await fetch(`${BASE_URL}/api/accounts/user/whs-names/${id}/`, {
                 method: "DELETE",
                 headers: {
-                    "Authorization": `Token ${localStorage.getItem("token")}`,
+                    "Authorization": `Token ${token}`,
                 },
             });
 

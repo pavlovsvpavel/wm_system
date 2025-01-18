@@ -14,11 +14,12 @@ export default function UploadFile() {
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const router = useRouter();
-    const { isAuthenticated, isLoading, logout } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
     const { files: uploadedFiles } = useFetchFiles(isAuthenticated, BASE_URL);
 
     const { setLatestFile } = useFile();
+    // const user_id = user?.id
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -96,9 +97,6 @@ export default function UploadFile() {
                 sessionStorage.removeItem("latest_file_id");
                 sessionStorage.removeItem("latest_file_name");
                 setLatestFile(null);
-            } else if (response.status === 401) {
-                logout();
-                toast.error("Your session has expired. Please log in again.");
             } else {
                 const errorData = await response.json();
                 setError(errorData?.error || "Upload failed. Please try again.");
@@ -114,7 +112,7 @@ export default function UploadFile() {
     return (
         <AuthWrapper>
             <div className="container">
-                <h1>Upload File</h1>
+                <h1>Upload database</h1>
                 {error && <p className="error-message">{error}</p>}
 
                 <div
