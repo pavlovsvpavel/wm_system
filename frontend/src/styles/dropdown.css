@@ -41,6 +41,7 @@
     display: flex;
     justify-content: center;
     width: 80%;
+    transition: ease-in-out 0.5s;
 }
 
 .custom-modal .modal-content {
@@ -101,7 +102,7 @@ margin: 0;
     border: none;
 }
 
-
+.custom-modal .modal-body .dropdown-item-warehouse,
 .custom-modal .modal-body .dropdown-item {
     display: flex;
     align-items: center;
@@ -111,6 +112,7 @@ margin: 0;
     font-size: 1.5em;
 }
 
+.custom-modal .modal-body .dropdown-item-warehouse .form-check,
 .custom-modal .modal-body .dropdown-item .form-check {
     display: flex;
     flex-direction: row-reverse;
@@ -144,6 +146,6 @@ margin: 0;
     overflow-y: auto;
 }
 
-.custom-modal .modal-body-scrollable .dropdown-item.hidden-placeholder {
+.custom-modal .modal-body-scrollable .dropdown-item-warehouse {
     display: none;
   }

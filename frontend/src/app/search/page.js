@@ -78,7 +78,7 @@ export default function SearchPage() {
 
             try {
                 const token = localStorage.getItem("token");
-                
+
                 const response = await fetch(
                     `${BASE_URL}/api/db/search/?scanned_pos_serial_number=${query}&latest_file_id=${latestFile}`,
                     {
@@ -295,7 +295,7 @@ export default function SearchPage() {
                                     <CModalTitle>Select Conditions</CModalTitle>
                                 </CModalHeader>
                                 <CModalBody className="modal-body-scrollable">
-                                    {conditions.map((condition, index) => (
+                                    {conditions.length > 0 ? (conditions.map((condition, index) => (
                                         <div key={index} className="dropdown-item">
                                             <CFormCheck
                                                 id={`condition-${index}`}
@@ -304,7 +304,10 @@ export default function SearchPage() {
                                                 onChange={() => handleConditionChange(condition.technical_condition)}
                                             />
                                         </div>
-                                    ))}
+                                    ))
+                                    ) : (
+                                        <div className="dropdown-item">No saved conditions</div>
+                                    )}
                                 </CModalBody>
                             </CModal>
                         </div>
@@ -326,13 +329,12 @@ export default function SearchPage() {
                                 </CModalHeader>
                                 <CModalBody className="modal-body-scrollable">
                                     <div
-                                        className="dropdown-item"
+                                        className="dropdown-item-warehouse"
                                         onClick={() => handleWarehouseChange('')}
                                     >
-                                        {/* Select Warehouse */}
                                     </div>
 
-                                    {Array.isArray(warehouses) &&
+                                    {Array.isArray(warehouses) && warehouses.length > 0 ?
                                         warehouses.map((warehouse, index) => (
                                             <div
                                                 key={index}
@@ -341,7 +343,10 @@ export default function SearchPage() {
                                             >
                                                 {warehouse.whs_name}
                                             </div>
-                                        ))}
+                                        ))
+                                        : (
+                                            <div className="dropdown-item">No saved warehouses</div>
+                                        )}
                                 </CModalBody>
                             </CModal>
                         </div>

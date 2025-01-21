@@ -61,22 +61,26 @@ export default function UserOptions() {
                     <div className="section">
                         <h2>Technical Conditions</h2>
                         <ul className="data">
-                            {conditions.map((condition, index) => (
-                                <li key={index}>{condition.technical_condition}
-                                    <button onClick={() => handleDeleteCondition(condition.id)} className="delete-icon"><RiDeleteBin6Line /></button></li>
-                            ))}
+                            {conditions.length > 0 ? (
+                                conditions.map((condition, index) => (
+                                    <li key={index}>{condition.technical_condition}
+                                        <button onClick={() => handleDeleteCondition(condition.id)} className="delete-icon"><RiDeleteBin6Line /></button></li>
+                                ))
+                            ) : (
+                                <li>No saved conditions</li>
+                            )}
                         </ul>
                         <div className="add-data">
                             <input
                                 type="text"
-                                placeholder="New Condition"
+                                placeholder="New condition"
                                 value={newCondition}
                                 onChange={(e) => setNewCondition(e.target.value)}
                             />
                             <button className="btn"
                                 onClick={handleAddCondition}
                             >
-                                Add Condition
+                                Save
                             </button>
                         </div>
                     </div>
@@ -84,23 +88,33 @@ export default function UserOptions() {
                     <div className="section">
                         <h2>Warehouses</h2>
                         <ul className="data">
-                            {warehouses.map((warehouse, index) => (
-                                <li key={index}>{warehouse.whs_name}
-                                    <button onClick={() => handleDeleteWarehouse(warehouse.id)} className="delete-icon"><RiDeleteBin6Line /></button>
-                                </li>
-                            ))}
+                            {warehouses.length > 0 ? (
+                                warehouses.map((warehouse, index) => (
+                                    <li key={index}>
+                                        {warehouse.whs_name}
+                                        <button
+                                            onClick={() => handleDeleteWarehouse(warehouse.id)}
+                                            className="delete-icon"
+                                        >
+                                            <RiDeleteBin6Line />
+                                        </button>
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No saved warehouses</li>
+                            )}
                         </ul>
                         <div className="add-data">
                             <input
                                 type="text"
-                                placeholder="New Warehouse"
+                                placeholder="New warehouse"
                                 value={newWarehouse}
                                 onChange={(e) => setNewWarehouse(e.target.value)}
                             />
                             <button className="btn"
                                 onClick={handleAddWarehouse}
                             >
-                                Add Warehouse
+                                Save
                             </button>
                         </div>
                     </div>
