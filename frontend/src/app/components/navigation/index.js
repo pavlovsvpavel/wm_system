@@ -8,7 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 
 
 const Navigation = () => {
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout, user } = useAuth();
     const pathname = usePathname();
 
     const showNavigationRoutes = ["/dashboard", "/upload", "/export", "/search", "/qr-scanner", "/user-options"];
@@ -61,26 +61,32 @@ const Navigation = () => {
                                     <img className="menu-btn" src="/images/close.svg" alt="close-icon" />
                                 </label>
                                 <ul className="nav-links">
-                                    <li>
-                                        <Link href="/upload">
-                                            <p>Upload</p>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/export">
-                                            <p>Export</p>
-                                        </Link>
-                                    </li>
+                                    {user?.is_staff ? (
+                                        <>
+                                            <li>
+                                                <Link href="/upload">
+                                                    <p>Upload</p>
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link href="/export">
+                                                    <p>Export</p>
+                                                </Link>
+                                            </li>
+                                        </>
+                                    ) : null}
                                     <li>
                                         <Link href="/search">
                                             <p>Search</p>
                                         </Link>
                                     </li>
-                                    <li>
-                                        <Link href="/user-options">
-                                            <p>Settings</p>
-                                        </Link>
-                                    </li>
+                                    {user?.is_staff && (
+                                        <li>
+                                            <Link href="/user-options">
+                                                <p>Settings</p>
+                                            </Link>
+                                        </li>
+                                    )}
                                 </ul>
                                 <button className="nav-btn" style={{ color: "#000" }} onClick={logout}>
                                     Log out

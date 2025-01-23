@@ -4,8 +4,9 @@ from rest_framework import generics as api_generic_views, status, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
+from accounts.mixins import GetModelQuerySetMixin
 from accounts.models import UserAccountTechnicalCondition, UserAccountWhsName
-from accounts.permissions import IsOwnerPermission
+from accounts.permissions import IsAuthenticatedPermission
 from accounts.serializers import UserRegisterSerializer, UserAccountTechnicalConditionSerializer, UserSerializer, \
     UserAccountWhsNameSerializer
 
@@ -40,14 +41,13 @@ class LoginApiView(token_views.ObtainAuthToken):
 # class LogoutApiView(api_generic_views.GenericAPIView):
 #     pass
 
-class UserAccountTechnicalConditionView(api_generic_views.RetrieveUpdateDestroyAPIView):
-    queryset = UserAccountTechnicalCondition.objects.all()
+class UserAccountTechnicalConditionView(GetModelQuerySetMixin, api_generic_views.RetrieveUpdateDestroyAPIView):
     serializer_class = UserAccountTechnicalConditionSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
+    model = UserAccountTechnicalCondition
 
     def get(self, request, *args, **kwargs):
-        filtered_queryset = UserAccountTechnicalCondition.objects.filter(user=self.request.user)
-        conditions = filtered_queryset
+        conditions = self.get_queryset(request, self.model)
         serializer = self.serializer_class(conditions, many=True)
 
         return Response(serializer.data)
@@ -63,7 +63,7 @@ class UserAccountTechnicalConditionView(api_generic_views.RetrieveUpdateDestroyA
 
     def delete(self, request, *args, **kwargs):
         try:
-            warehouse = self.get_queryset().get(pk=kwargs["pk"])
+            warehouse = self.get_queryset(request, self.model).get(pk=kwargs["pk"])
             warehouse.delete()
             return Response({"detail": "Technical condition deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except UserAccountTechnicalCondition.DoesNotExist:
@@ -73,14 +73,13 @@ class UserAccountTechnicalConditionView(api_generic_views.RetrieveUpdateDestroyA
             )
 
 
-class UserAccountWHSNameView(api_generic_views.RetrieveUpdateDestroyAPIView):
-    queryset = UserAccountWhsName.objects.all()
+class UserAccountWHSNameView(GetModelQuerySetMixin, api_generic_views.RetrieveUpdateDestroyAPIView):
     serializer_class = UserAccountWhsNameSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
+    model = UserAccountWhsName
 
     def get(self, request, *args, **kwargs):
-        filtered_queryset = UserAccountWhsName.objects.filter(user=self.request.user)
-        warehouses = filtered_queryset
+        warehouses = self.get_queryset(request, self.model)
         serializer = self.serializer_class(warehouses, many=True)
 
         return Response(serializer.data)
@@ -95,7 +94,7 @@ class UserAccountWHSNameView(api_generic_views.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            warehouse = self.get_queryset().get(pk=kwargs["pk"])
+            warehouse = self.get_queryset(request, self.model).get(pk=kwargs["pk"])
             warehouse.delete()
             return Response({"detail": "Warehouse deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except UserAccountWhsName.DoesNotExist:

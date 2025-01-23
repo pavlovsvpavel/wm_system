@@ -1,26 +1,29 @@
 import warnings
 
 import pandas as pd
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import generics as api_generic_views, permissions, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
+from accounts.mixins import GetModelQuerySetMixin
 from upload_files.models import UploadedFile, UploadedFileRowData
-from accounts.permissions import IsOwnerPermission
+from accounts.permissions import IsAuthenticatedPermission
 from upload_files.serializers import UploadedFileSerializer, ListUploadedFilesSerializer
+
+UserModel = get_user_model()
 
 # Suppress the warning for headers and footers
 warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
 
 class UploadFileView(api_generic_views.CreateAPIView):
-    queryset = UploadedFile.objects.all()
     serializer_class = UploadedFileSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, *args, **kwargs):
-        filtered_queryset = UploadedFile.objects.filter(user=request.user)
+        filtered_queryset = UploadedFile.objects.select_related('user').filter(user=request.user)
         file = request.FILES.get('file')
 
         if not file:
@@ -29,7 +32,6 @@ class UploadFileView(api_generic_views.CreateAPIView):
         if not file.name.lower().endswith(('.xlsx', '.xls')):
             return Response({'error': 'Invalid file type. Only Excel files are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check for duplicate file names for the current user
         if filtered_queryset.filter(name=file.name).exists():
             return Response({'error': 'A file with this name already exists for this user.'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -44,10 +46,8 @@ class UploadFileView(api_generic_views.CreateAPIView):
                 except Exception as e:
                     return Response({'error': f'Error reading Excel file: {e}'}, status=status.HTTP_400_BAD_REQUEST)
 
-                # Get the actual columns from the DataFrame
                 actual_columns = set(df.columns)
 
-                #Now you can perform your checks based on actual_columns
                 required_columns = {'POS SN', 'Outlet/WHS name', 'Scanned_Technical_condition', 'Scanned_WHS'}
                 if not required_columns.issubset(actual_columns):
                     return Response({'error': f'Missing required columns: {required_columns - actual_columns}'}, status=status.HTTP_400_BAD_REQUEST)
@@ -105,20 +105,20 @@ class UploadFileView(api_generic_views.CreateAPIView):
             return Response({'error': f"Unexpected error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class ListUploadedFilesView(api_generic_views.ListAPIView):
-    queryset = UploadedFile.objects.all()
+class ListUploadedFilesView(GetModelQuerySetMixin, api_generic_views.ListAPIView):
     serializer_class = ListUploadedFilesSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
+    model = UploadedFile
 
     def get(self, request, *args, **kwargs):
         try:
-            filtered_queryset = self.queryset.filter(user=request.user)
+            filtered_queryset = self.get_queryset(request, self.model)
             uploaded_files = filtered_queryset
 
             if not uploaded_files.exists():
                 return Response(
                     {'message': 'No files uploaded yet.'},
-                    status=status.HTTP_204_NO_CONTENT  # Or any other status like 404
+                    status=status.HTTP_204_NO_CONTENT
                 )
 
             serializer = self.get_serializer(uploaded_files, many=True)
@@ -127,25 +127,23 @@ class ListUploadedFilesView(api_generic_views.ListAPIView):
             return Response({'error': f"Failed to fetch files: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class RetrieveLatestFileIdView(api_generic_views.RetrieveAPIView):
-    queryset = UploadedFile.objects.all()
+class RetrieveLatestFileIdView(GetModelQuerySetMixin, api_generic_views.RetrieveAPIView):
     serializer_class = UploadedFileSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
+    model = UploadedFile
 
     def get(self, request, *args, **kwargs):
         try:
-            filtered_queryset = self.queryset.filter(user=request.user)
-            latest_file = filtered_queryset.order_by('-upload_date').first()
+            filtered_queryset = self.get_queryset(request, self.model).order_by('-upload_date').first()
+            latest_file = filtered_queryset
 
             if latest_file:
                 latest_file_id = latest_file.id
                 latest_file_name = latest_file.name
-                # Check if the session has a current latest file id and if it is different
                 current_file_id = request.session.get('latest_file_id')
                 current_file_name = request.session.get('latest_file_name')
 
                 if current_file_id != latest_file_id and current_file_name != latest_file_name:
-                    # Update the session with the new latest file id
                     request.session['latest_file_id'] = latest_file_id
                     request.session['latest_file_name'] = latest_file_name
                     return Response({
@@ -154,7 +152,6 @@ class RetrieveLatestFileIdView(api_generic_views.RetrieveAPIView):
                         'latest_file_name': latest_file_name,
                     }, status=status.HTTP_200_OK)
                 else:
-                    # If the latest file in the database is the same as the one in the session
                     return Response({
                         'message': 'No new latest file, session remains the same.',
                         'latest_file_id': current_file_id,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from "react-toastify";
 import { useRouter, usePathname } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";

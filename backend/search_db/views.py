@@ -5,7 +5,7 @@ from rest_framework import generics as api_generic_views
 from rest_framework.response import Response
 from django.db import transaction
 
-from accounts.permissions import IsOwnerPermission
+from accounts.permissions import IsAuthenticatedPermission
 from search_db.serializers import QRCodeSerializer
 from upload_files.models import UploadedFile, UploadedFileRowData
 from upload_files.serializers import UploadedFileRowDataSerializer
@@ -13,14 +13,12 @@ from upload_files.serializers import UploadedFileRowDataSerializer
 
 class QRCodeSearchView(api_generic_views.RetrieveAPIView):
     serializer_class = QRCodeSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
 
     def get_object(self):
         request: Request = self.request
         scanned_pos_serial_number = request.query_params.get('scanned_pos_serial_number')
         latest_file_id = request.query_params.get('latest_file_id')
-        # user_id = request.query_params.get('user_id')
-        user = request.user
 
         if not latest_file_id:
             latest_file_id = request.session.get('latest_file_id')
@@ -32,14 +30,13 @@ class QRCodeSearchView(api_generic_views.RetrieveAPIView):
         row = (UploadedFileRowData.objects.filter(
             file_id=latest_file_id,
             pos_serial_number=scanned_pos_serial_number,
-            user=user,
         ).first())
 
         return row
 
 class QRCodeUpdateView(api_generic_views.UpdateAPIView):
     serializer_class = QRCodeSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
 
     def update(self, request, *args, **kwargs):
         latest_file_id = request.session.get('latest_file_id') or request.data.get('latest_file_id')
@@ -56,7 +53,7 @@ class QRCodeUpdateView(api_generic_views.UpdateAPIView):
             return Response({'error': 'No scanned POS serial number provided.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Retrieve the file using the latest_file_id from the session
+        # Retrieve the file using the latest_file_id from the session storage
         try:
             uploaded_file = UploadedFile.objects.only('id').get(id=latest_file_id)
         except UploadedFile.DoesNotExist:
@@ -81,6 +78,7 @@ class QRCodeUpdateView(api_generic_views.UpdateAPIView):
                     row_instance.scanned_technical_condition = serializer.validated_data.get(
                         'scanned_technical_condition', '')
                     row_instance.scanned_outlet_whs_name = serializer.validated_data.get('scanned_outlet_whs_name', '')
+                    row_instance.user  = self.request.user
                     row_instance.save()
 
                     return Response({

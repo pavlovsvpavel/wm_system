@@ -6,14 +6,14 @@ from rest_framework.response import Response
 
 from export_files.models import UploadedFileRowDataResource
 from upload_files.models import UploadedFile
-from accounts.permissions import IsOwnerPermission
+from accounts.permissions import IsAuthenticatedPermission
 from upload_files.serializers import UploadedFileSerializer, UploadedFileRowDataSerializer
 
 
 class ExportFileView(api_generic_views.GenericAPIView):
     serializer_class = UploadedFileSerializer
     serializer_class_row_data = UploadedFileRowDataSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerPermission]
+    permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
 
     def get(self, request, pk):
         try:
