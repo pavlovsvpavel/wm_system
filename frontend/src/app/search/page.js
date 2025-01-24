@@ -247,37 +247,6 @@ export default function SearchPage() {
                 </div>
 
                 {searchResults && (
-                    <div className="search-results">
-                        <ul>
-                            <li>
-                                <p>Serial Number:</p>
-                                <p>{searchResults.pos_serial_number}</p>
-                            </li>
-                            <li>
-                                <p>POS Type:</p>
-                                <p>{searchResults.pos_type}</p>
-                            </li>
-                            <li>
-                                <p>Outlet/WHS name:</p>
-                                <p>{searchResults.outlet_whs_name}</p>
-                            </li>
-                            <li>
-                                <p>Outlet/WHS address:</p>
-                                <p>{searchResults.outlet_whs_address}</p>
-                            </li>
-                            <li>
-                                <p>Technical conditions:</p>
-                                <p>{searchResults.scanned_technical_condition}</p>
-                            </li>
-                            <li>
-                                <p>Scanned WHS name:</p>
-                                <p>{searchResults.scanned_outlet_whs_name}</p>
-                            </li>
-                        </ul>
-                    </div>
-                )}
-
-                {searchResults && (
                     <div className="selection-fields">
                         <div className="conditions-dropdown">
                             <CButton className="dropdown-menu-btn" onClick={openModal}>
@@ -354,6 +323,37 @@ export default function SearchPage() {
                         <div className="save-button">
                             <button className="btn" onClick={handleSave}>Save</button>
                         </div>
+                    </div>
+                )}
+
+                {searchResults && (
+                    <div className="search-results">
+                        <ul>
+                            <li>
+                                <p>Serial Number:</p>
+                                <p>{searchResults.pos_serial_number}</p>
+                            </li>
+                            <li>
+                                <p>POS Type:</p>
+                                <p>{searchResults.pos_type}</p>
+                            </li>
+                            <li>
+                                <p>Outlet/WHS name:</p>
+                                <p>{searchResults.outlet_whs_name}</p>
+                            </li>
+                            <li>
+                                <p>Outlet/WHS address:</p>
+                                <p>{searchResults.outlet_whs_address}</p>
+                            </li>
+                            <li>
+                                <p>Technical conditions:</p>
+                                <p>{searchResults.scanned_technical_condition}</p>
+                            </li>
+                            <li>
+                                <p>Scanned WHS name:</p>
+                                <p>{searchResults.scanned_outlet_whs_name}</p>
+                            </li>
+                        </ul>
                     </div>
                 )}
             </div>
