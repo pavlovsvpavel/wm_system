@@ -11,7 +11,7 @@ const Navigation = () => {
     const { isAuthenticated, logout, user } = useAuth();
     const pathname = usePathname();
 
-    const showNavigationRoutes = ["/dashboard", "/upload", "/export", "/search", "/qr-scanner", "/user-options"];
+    const showNavigationRoutes = ["/dashboard", "/upload", "/export", "/search", "/qr-scanner", "/user-options", "/routing"];
     const shouldShowNavigation = showNavigationRoutes.includes(pathname);
 
     useEffect(() => {
@@ -87,6 +87,11 @@ const Navigation = () => {
                                             </Link>
                                         </li>
                                     )}
+                                    <li>
+                                        <Link href="/routing">
+                                            <p>Routing</p>
+                                        </Link>
+                                    </li>
                                 </ul>
                                 <button className="nav-btn" style={{ color: "#000" }} onClick={logout}>
                                     Log out

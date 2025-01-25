@@ -12,6 +12,7 @@
 @import url('navbar.css');
 @import url('user-options.css');
 @import url('dropdown.css');
+@import url('routing.css');
 
 :root {
     --background: #000000;

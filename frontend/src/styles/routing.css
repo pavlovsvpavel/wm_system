@@ -1,0 +1,122 @@
+.date-picker-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+.btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    color: #000;
+}
+
+.load-data-btn {
+    margin-top: 2em;
+    background-color: var(--button-color);
+    padding: 0.8em 1.5em;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+}
+
+.scan-btn:hover,
+.load-data-btn:hover {
+    background-color: var(--button-color-hover);
+}
+
+.date-picker-input {
+    color: #000;
+    border-radius: 5px;
+    padding: 0.5em;
+}
+
+.loaded-outlets {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 80%;
+}
+
+.outlet {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.company-outlets-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.outlet-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    border-radius: 5px;
+    padding: 0.5em;
+    font-size: 0.8em;
+}
+
+.outlet-sub-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.outlet-sub-details-data {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid #fff;
+    padding: 0.5em;
+    align-items: center;
+    text-align: left;
+    gap: 0.5em;
+}
+
+.outlet-sub-details-data span:last-of-type {
+    flex: 0 1 50%;
+}
+
+.outlet-sub-details input {
+    border-radius: 5px;
+    padding: 0.3em;
+}
+
+.scan-btn {
+    background-color: var(--button-color);
+    padding: 0.8em 1.5em;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    align-self: center;
+}
+
+
+@media (max-width: 600px) {
+    .outlet-sub-details-data {
+        flex-direction: column;
+        text-align: left;
+        align-items: normal;
+    }
+
+    .outlet-sub-details {
+        text-align: left;
+    }
+
+    .loaded-outlets {
+        width: 100%;
+    }
+}
+
+

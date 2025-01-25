@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BrowserMultiFormatReader } from '@zxing/library';
 import { useAuth } from '../context/AuthContext';
 import AuthWrapper from "../components/auth/authWrapper";
@@ -9,6 +9,7 @@ import { BiSolidTorch } from "react-icons/bi";
 
 export default function QRScanner() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { isAuthenticated } = useAuth();
     const videoRef = useRef(null);
     const [torchOn, setTorchOn] = useState(false);
@@ -17,11 +18,30 @@ export default function QRScanner() {
     const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
     const codeReader = useRef(new BrowserMultiFormatReader());
 
-    // Handle successful scan
+    // Get the redirect destination from query parameters
+    const redirectTo = searchParams.get('redirectTo') || '/search';
+
     const handleScanSuccess = (decodedText) => {
         if (!isAuthenticated) return;
+    
         stopCamera();
-        router.replace(`/search?qr=${decodedText}`);
+    
+        if (redirectTo === '/routing') {
+            // For the routing page, save the QR data in localStorage
+            const id = new URLSearchParams(window.location.search).get('id');
+            const qrScanResult = { id, pos_serial_number: decodedText };
+    
+            // Save the scan result to localStorage
+            localStorage.setItem('qrScanResult', JSON.stringify(qrScanResult));
+    
+            // Redirect to the routing page
+            router.replace('/routing');
+        } else if (redirectTo === '/search') {
+            // Redirect to the search page with the QR code
+            router.replace(`/search?qr=${decodedText}`);
+        } else {
+            console.warn('Unknown redirect destination:', redirectTo);
+        }
     };
 
     // Handle scan errors

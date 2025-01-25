@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'upload_files.apps.UploadFilesConfig',
     'export_files.apps.ExportFilesConfig',
     'search_db.apps.SearchDbConfig',
+    'routing.apps.RoutingConfig',
 ]
 
 MIDDLEWARE = [

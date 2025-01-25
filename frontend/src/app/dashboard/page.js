@@ -38,6 +38,9 @@ export default function Dashboard() {
                             Settings
                         </button>
                     )}
+                    <button onClick={() => router.push("/routing")}>
+                        Routing
+                    </button>
                 </div>
             </div>
         </AuthWrapper>

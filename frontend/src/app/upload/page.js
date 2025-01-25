@@ -17,9 +17,7 @@ export default function UploadFile() {
     const { isAuthenticated, logout } = useAuth();
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
     const { files: uploadedFiles } = useFetchFiles(isAuthenticated, BASE_URL);
-
     const { setLatestFile } = useFile();
-    // const user_id = user?.id
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
