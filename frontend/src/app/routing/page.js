@@ -73,7 +73,8 @@ export default function RoutingPage() {
 
         try {
             const token = localStorage.getItem("token");
-            let url = `${BASE_URL}/api/routing/get-data/?date=${displayDate}`;
+            const formattedDate = selectedDate.toISOString().split('T')[0];
+            let url = `${BASE_URL}/api/routing/get-data/?date=${formattedDate}`;
             if (!user.is_staff) {
                 url += `&user=${user.username}`;
             }
@@ -174,16 +175,16 @@ export default function RoutingPage() {
 
         if (savedState) {
             const { selectedDate, displayDate, data, updatedData } = JSON.parse(savedState);
-            setSelectedDate(selectedDate);
+            setSelectedDate(selectedDate ? new Date(selectedDate) : null);
             setDisplayDate(displayDate);
             setData(data);
             setUpdatedData(updatedData);
             localStorage.removeItem('routingState');
         }
-
+    
         if (scanResult) {
             const { id, pos_serial_number } = JSON.parse(scanResult);
-
+    
             if (id) {
                 setUpdatedData((prev) => ({
                     ...prev,
@@ -193,7 +194,7 @@ export default function RoutingPage() {
                     },
                 }));
             }
-
+    
             localStorage.removeItem('qrScanResult');
         }
     }, []);
@@ -268,7 +269,7 @@ export default function RoutingPage() {
                 toast.success("Data uploaded successfully!");
                 setSelectedFile(null);
                 document.getElementById("file").value = "";
-                setShowUploadSection(false); // Hide the upload section after successful upload
+                setShowUploadSection(false);
             } else {
                 const errorData = await response.json();
                 setError(errorData?.error || "Upload failed. Please try again.");
@@ -336,7 +337,7 @@ export default function RoutingPage() {
                 )}
 
             <div className="date-picker-container">
-                <label htmlFor="date">Select Date: </label>
+                <label htmlFor="date">Select date: </label>
                 <DatePicker
                     selected={selectedDate}
                     onChange={handleDateChange}

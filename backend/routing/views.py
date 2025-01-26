@@ -1,14 +1,18 @@
 import pandas as pd
 from django.db import transaction
 from rest_framework import generics as api_generic_views
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
+from accounts.permissions import IsAuthenticatedPermission
 from routing.models import RoutingUploadedFileData
 from routing.serializers import RoutingUploadedFileDataSerializer
 
 class RoutingUploadedFileDataView(api_generic_views.CreateAPIView):
     serializer_class = RoutingUploadedFileDataSerializer
+    permission_classes = [IsAuthenticated, IsAuthenticatedPermission]
+
     def post(self, request, *args, **kwargs):
         file = request.FILES.get('file')
 
@@ -46,6 +50,7 @@ class RoutingUploadedFileDataView(api_generic_views.CreateAPIView):
             return Response({'error': f"Unexpected error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class RoutingRetrieveDataView(api_generic_views.RetrieveAPIView):
     serializer_class = RoutingUploadedFileDataSerializer
+    permission_classes = [IsAuthenticated, IsAuthenticatedPermission]
 
     def get(self, request, *args, **kwargs):
         date = request.query_params.get('date', None)
@@ -62,17 +67,27 @@ class RoutingRetrieveDataView(api_generic_views.RetrieveAPIView):
 
 
 class RoutingUpdateDataView(api_generic_views.UpdateAPIView):
+    serializer_class = RoutingUploadedFileDataSerializer
+    permission_classes = [IsAuthenticated, IsAuthenticatedPermission]
+
     def patch(self, request, *args, **kwargs):
         updated_data = request.data
 
         for record_id, fields in updated_data.items():
             try:
                 record = RoutingUploadedFileData.objects.get(id=record_id)
-                for field, value in fields.items():
-                    setattr(record, field, value)
-                record.save()
+
+                serializer = self.serializer_class(record, data=fields, partial=True)
+                serializer.is_valid(raise_exception=True)
+
+                if hasattr(record, 'user'):
+                    serializer.validated_data['user'] = request.user
+
+                serializer.save()
             except RoutingUploadedFileData.DoesNotExist:
                 # If the record with the given id does not exist, skip it
                 continue
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Data saved successfully."}, status=status.HTTP_200_OK)

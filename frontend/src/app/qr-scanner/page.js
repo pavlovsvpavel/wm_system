@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense  } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BrowserMultiFormatReader } from '@zxing/library';
 import { useAuth } from '../context/AuthContext';
 import AuthWrapper from "../components/auth/authWrapper";
 import { BiSolidTorch } from "react-icons/bi";
 
-export default function QRScanner() {
+// Wrap the main component in Suspense
+export default function QRScannerPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <QRScanner />
+        </Suspense>
+    );
+}
+
+function QRScanner() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { isAuthenticated } = useAuth();

@@ -8,7 +8,6 @@ class RoutingUploadedFileDataAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ("id", "type_of_route", "sr_name", "region", "company_name",
                     "outlet_name", "delivery_address", "pos_model",
                     "pos_serial_number", "comment", "transport_company", "date_for_delivery",
-                    'user', 'created_at', 'updated_at',)
+                    "created_at", "updated_at", "user")
 
-    list_filter = ("type_of_route", "region", "date_for_delivery")
-
+    list_filter = ("type_of_route", "region", "transport_company", "date_for_delivery")
