@@ -1,3 +1,7 @@
+.react-datepicker {
+    font-family: inherit !important;
+}
+
 .date-picker-container {
     display: flex;
     flex-direction: column;
@@ -13,6 +17,10 @@
     background-color: #ccc;
     cursor: not-allowed;
     color: #000;
+}
+
+.btn:disabled:hover {
+    background-color: #ccc;
 }
 
 .load-data-btn {
