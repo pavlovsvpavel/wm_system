@@ -19,12 +19,12 @@ export default function RoutingPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [updatedData, setUpdatedData] = useState({});
-    const [isUploading, setIsUploading] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [showUploadSection, setShowUploadSection] = useState(false);
+    // const [isUploading, setIsUploading] = useState(false);
+    // const [isDragging, setIsDragging] = useState(false);
+    // const [selectedFile, setSelectedFile] = useState(null);
+    // const [showUploadSection, setShowUploadSection] = useState(false);
 
-    const uploadSectionRef = useRef(null);
+    // const uploadSectionRef = useRef(null);
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -36,21 +36,21 @@ export default function RoutingPage() {
     }, [selectedDate]);
 
     // Handle clicks outside the upload section
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (uploadSectionRef.current && !uploadSectionRef.current.contains(event.target)) {
-                setShowUploadSection(false);
-            }
-        };
+    // useEffect(() => {
+    //     const handleClickOutside = (event) => {
+    //         if (uploadSectionRef.current && !uploadSectionRef.current.contains(event.target)) {
+    //             setShowUploadSection(false);
+    //         }
+    //     };
 
-        // Attach the event listener
-        document.addEventListener("mousedown", handleClickOutside);
+    //     // Attach the event listener
+    //     document.addEventListener("mousedown", handleClickOutside);
 
-        // Cleanup the event listener
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
+    //     // Cleanup the event listener
+    //     return () => {
+    //         document.removeEventListener("mousedown", handleClickOutside);
+    //     };
+    // }, []);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
@@ -208,79 +208,79 @@ export default function RoutingPage() {
         return acc;
     }, {});
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            validateFile(file);
-        }
-    };
+    // const handleFileChange = (event) => {
+    //     const file = event.target.files[0];
+    //     if (file) {
+    //         validateFile(file);
+    //     }
+    // };
 
-    const handleDrop = (event) => {
-        event.preventDefault();
-        setIsDragging(false);
+    // const handleDrop = (event) => {
+    //     event.preventDefault();
+    //     setIsDragging(false);
 
-        const file = event.dataTransfer.files[0];
-        if (file) {
-            validateFile(file);
-        }
-    };
+    //     const file = event.dataTransfer.files[0];
+    //     if (file) {
+    //         validateFile(file);
+    //     }
+    // };
 
-    const validateFile = (file) => {
-        if (!file.name.toLowerCase().endsWith(".xlsx") && !file.name.toLowerCase().endsWith(".xls")) {
-            setError("Invalid file type. Only Excel files are allowed.");
-            setSelectedFile(null);
-            return;
-        }
-        setSelectedFile(file);
-    };
+    // const validateFile = (file) => {
+    //     if (!file.name.toLowerCase().endsWith(".xlsx") && !file.name.toLowerCase().endsWith(".xls")) {
+    //         setError("Invalid file type. Only Excel files are allowed.");
+    //         setSelectedFile(null);
+    //         return;
+    //     }
+    //     setSelectedFile(file);
+    // };
 
-    const handleDragOver = (event) => {
-        event.preventDefault();
-        setIsDragging(true);
-    };
+    // const handleDragOver = (event) => {
+    //     event.preventDefault();
+    //     setIsDragging(true);
+    // };
 
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
+    // const handleDragLeave = () => {
+    //     setIsDragging(false);
+    // };
 
-    const handleUpload = async () => {
-        if (!selectedFile) {
-            setError("Please select a file to upload.");
-            return;
-        }
+    // const handleUpload = async () => {
+    //     if (!selectedFile) {
+    //         setError("Please select a file to upload.");
+    //         return;
+    //     }
 
-        setIsUploading(true);
-        setError("");
+    //     setIsUploading(true);
+    //     setError("");
 
-        try {
-            const formData = new FormData();
-            formData.append("file", selectedFile);
+    //     try {
+    //         const formData = new FormData();
+    //         formData.append("file", selectedFile);
 
-            const token = localStorage.getItem("token");
-            const response = await fetch(`${BASE_URL}/api/routing/upload-data/`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Token ${token}`,
-                },
-                body: formData,
-            });
+    //         const token = localStorage.getItem("token");
+    //         const response = await fetch(`${BASE_URL}/api/routing/upload-data/`, {
+    //             method: "POST",
+    //             headers: {
+    //                 Authorization: `Token ${token}`,
+    //             },
+    //             body: formData,
+    //         });
 
-            if (response.status === 201) {
-                toast.success("Data uploaded successfully!");
-                setSelectedFile(null);
-                document.getElementById("file").value = "";
-                setShowUploadSection(false);
-            } else {
-                const errorData = await response.json();
-                setError(errorData?.error || "Upload failed. Please try again.");
-            }
-        } catch (error) {
-            console.error("Upload error:", error);
-            setError("An error occurred. Please try again.");
-        } finally {
-            setIsUploading(false);
-        }
-    };
+    //         if (response.status === 201) {
+    //             toast.success("Data uploaded successfully!");
+    //             setSelectedFile(null);
+    //             document.getElementById("file").value = "";
+    //             setShowUploadSection(false);
+    //         } else {
+    //             const errorData = await response.json();
+    //             setError(errorData?.error || "Upload failed. Please try again.");
+    //         }
+    //     } catch (error) {
+    //         console.error("Upload error:", error);
+    //         setError("An error occurred. Please try again.");
+    //     } finally {
+    //         setIsUploading(false);
+    //     }
+    // };
 
     return (
         <AuthWrapper>
@@ -289,7 +289,7 @@ export default function RoutingPage() {
                 {error && <p className="error-message">{error}</p>}
 
                 {/* Toggleable Upload Section */}
-                {user?.is_staff && (
+                {/* {user?.is_staff && (
                     !showUploadSection ? (
                         <button
                             onClick={() => setShowUploadSection(true)}
@@ -317,9 +317,9 @@ export default function RoutingPage() {
                                         Choose a file
                                     </label>
                                 </div>
-                            </div>
+                            </div> */}
 
-                            {selectedFile && (
+                            {/* {selectedFile && (
                                 <p className="selected-file">
                                     Selected file: {selectedFile.name}
                                 </p>
@@ -334,7 +334,7 @@ export default function RoutingPage() {
                             </button>
                         </div>
                     )
-                )}
+                )} */}
 
             <div className="date-picker-container">
                 <label htmlFor="date">Select date: </label>
@@ -390,7 +390,7 @@ export default function RoutingPage() {
                                 color: expandedCompany === companyName ? "#0070f3" : "#fff",
                             }}
                         >
-                            {companyName}
+                            {companyName} &rArr; {outlets.length}
                         </h5>
                         {expandedCompany === companyName && (
                             <div className="company-outlets-wrapper">

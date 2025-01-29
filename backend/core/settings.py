@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     "import_export",
     'corsheaders',
+    'rangefilter',
 
     'accounts.apps.AccountsConfig',
     'upload_files.apps.UploadFilesConfig',

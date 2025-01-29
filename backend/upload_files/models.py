@@ -8,6 +8,10 @@ class UploadedFile(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='user_files')
 
+    class Meta:
+        verbose_name = "Uploaded File"
+        verbose_name_plural = "Uploaded Files"
+
     def remove_file_extension(self):
         # Split the string by the last period using a regex
         base_name = re.sub(r'\.([^.]+)$', '', self.name)
@@ -15,6 +19,7 @@ class UploadedFile(models.Model):
 
     def __str__(self):
         return self.remove_file_extension()
+
 
 class UploadedFileRowData(models.Model):
     file = models.ForeignKey(UploadedFile, on_delete=models.CASCADE, related_name='rows')
@@ -52,6 +57,10 @@ class UploadedFileRowData(models.Model):
     scanned_outlet_whs_name = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Uploaded File Data"
+        verbose_name_plural = "Uploaded Files Data"
 
     def __str__(self):
         return self.file.name

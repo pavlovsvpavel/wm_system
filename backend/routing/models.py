@@ -17,8 +17,10 @@ class RoutingUploadedFileData(models.Model):
     date_for_delivery = models.DateField(blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='user_routes')
 
+    class Meta:
+        verbose_name = "Routing Data"
+        verbose_name_plural = "Routing Data"
 
     def __str__(self):
         return f'{self.company_name}, {self.delivery_address}'
