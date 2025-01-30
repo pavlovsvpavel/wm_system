@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
                     name="viewport"
                     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
                 />
-                <link rel="icon" href="/images/favicon.ico" type="image/png" />
+                <link rel="icon" href="/images/favicon.ico" type="image/x-icon"/>
                 <title>Warehouse Management</title>
             </head>
             <body className={ubuntu.variable}>

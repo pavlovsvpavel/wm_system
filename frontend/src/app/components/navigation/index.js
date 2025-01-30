@@ -92,6 +92,13 @@ const Navigation = () => {
                                             <p>Routing</p>
                                         </Link>
                                     </li>
+                                    {user?.is_staff && (
+                                        <li>
+                                            <Link href="/admin">
+                                                <p>Admin</p>
+                                            </Link>
+                                        </li>
+                                    )}
                                 </ul>
                                 <button className="nav-btn" style={{ color: "#000" }} onClick={logout}>
                                     Log out
