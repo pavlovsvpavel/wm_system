@@ -45,3 +45,10 @@ p {
   width: 100px;
   height: 100px;
 }
+
+@media (max-width: 600px) {
+  .button-group {
+      flex-direction: column;
+      gap: 2em;
+  }
+}

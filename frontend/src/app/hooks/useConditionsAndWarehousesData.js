@@ -31,7 +31,6 @@ const useFetchConditionsAndWarehouses = (isAuthenticated, BASE_URL) => {
                 setConditions(Array.isArray(conditionsData) ? conditionsData : []);
                 setWarehouses(Array.isArray(warehousesData) ? warehousesData : []);
             } catch (error) {
-                console.error("Error fetching data:", error);
                 setConditions([]);
                 setWarehouses([]);
                 toast.error("Failed to fetch conditions or warehouses.");

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { BrowserMultiFormatReader } from '@zxing/library';
 import { useAuth } from '../context/AuthContext';
 import AuthWrapper from "../components/auth/authWrapper";
-import { BiSolidTorch } from "react-icons/bi";
+import { RiLightbulbFlashLine } from "react-icons/ri";
 
 // Wrap the main component in Suspense
 export default function QRScannerPage() {
@@ -208,7 +208,7 @@ function QRScanner() {
                             background: torchOn ? '#ff4444' : 'yellow',
                         }}
                     >
-                        <BiSolidTorch />
+                        <RiLightbulbFlashLine  />
                     </button>
                 </div>
 

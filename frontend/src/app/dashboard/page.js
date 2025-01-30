@@ -31,7 +31,7 @@ export default function Dashboard() {
                         </button>
                     )}
                     <button onClick={() => router.push("/search")}>
-                        Search in database
+                        Inventory
                     </button>
                     {user?.is_staff && (
                         <button onClick={() => router.push("/user-options")}>

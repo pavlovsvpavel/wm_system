@@ -24,6 +24,9 @@
 }
 
 .load-data-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-top: 2em;
     background-color: var(--button-color);
     padding: 0.8em 1.5em;

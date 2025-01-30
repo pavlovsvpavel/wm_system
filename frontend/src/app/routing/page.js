@@ -86,7 +86,7 @@ export default function RoutingPage() {
                 },
             });
             if (!response.ok) {
-                throw new Error("Failed to fetch data.");
+                throw new Error("Failed to load data.");
             }
             const result = await response.json();
 
@@ -105,8 +105,7 @@ export default function RoutingPage() {
             }, {});
             setUpdatedData(initialUpdatedData);
         } catch (err) {
-            setError("Failed to fetch data. Please try again.");
-            console.error(err);
+            toast.error("Failed to load data. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -143,7 +142,7 @@ export default function RoutingPage() {
     const handleSave = async () => {
         if (!isAuthenticated) return;
         setLoading(true);
-        setError("");
+        // setError("");
 
         try {
             const token = localStorage.getItem("token");
@@ -162,8 +161,7 @@ export default function RoutingPage() {
 
             toast.success("Saved successfully.");
         } catch (err) {
-            setError("Failed to save data. Please try again.");
-            console.error(err);
+            toast.error("Failed to save data. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -434,7 +432,7 @@ export default function RoutingPage() {
                                             <button className="scan-btn"
                                                 onClick={() => handleQRScan(outlet.id)}
                                             >
-                                                Scan QR
+                                                Scan QR Code
                                             </button>)}
                                     </div>
                                 ))}

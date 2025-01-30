@@ -53,7 +53,6 @@ export default function SearchPage() {
                     toast.error("Failed to fetch the latest database.");
                 }
             } catch (error) {
-                console.error("Error fetching latest file:", error);
                 toast.error("Failed to fetch latest database.");
             }
         };
@@ -221,7 +220,7 @@ export default function SearchPage() {
     return (
         <AuthWrapper>
             <div className="container">
-                <h1>Search in database</h1>
+                <h1>Inventory management</h1>
                 <div className="latest-file">
                     {latestFile && latestFile.latest_file_name ? (
                         <p>

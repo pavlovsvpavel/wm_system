@@ -116,6 +116,9 @@ h6 {
     color: #fff;
     border: none;
     font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn:hover {
