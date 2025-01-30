@@ -20,12 +20,12 @@ class RoutingUploadedFileDataResource(resources.ModelResource):
     class Meta:
         model = RoutingUploadedFileData
 
-        fields = ("date_for_delivery", "pos_serial_number", "type_of_route", "sr_name", "region",
-                  "company_name", "outlet_name", "delivery_address", "pos_model",
-                  "comment", "transport_company", "created_at", "updated_at",)
+        fields = ("type_of_route", "sr_name", "region",
+                  "company_name", "outlet_name", "delivery_address", "pos_model", "pos_serial_number",
+                  "comment", "transport_company", "date_for_delivery", "created_at", "updated_at",)
 
-        export_order = ("date_for_delivery", "pos_serial_number", "type_of_route", "sr_name", "region",
-                        "company_name", "outlet_name", "delivery_address", "pos_model",
-                        "comment", "transport_company", "created_at", "updated_at",)
+        export_order = ("type_of_route", "sr_name", "region",
+                        "company_name", "outlet_name", "delivery_address", "pos_model", "pos_serial_number",
+                        "comment", "transport_company", "date_for_delivery", "created_at", "updated_at",)
 
         import_id_fields = []

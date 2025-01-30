@@ -35,7 +35,6 @@ export function useFetchFiles(isAuthenticated, BASE_URL) {
                 }
             } catch (error) {
                 if (error.name !== "AbortError") {
-                    console.error("Error fetching files:", error);
                     setError(error);
                     toast.error("Failed to fetch databases. Please try again.");
                 }

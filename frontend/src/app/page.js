@@ -6,7 +6,7 @@ export default function Home() {
         <div className="container">
             <div className="content">
                 <img src="/images/Pepsi-logo.png" alt="logo" />
-                <h1>Warehouse Management</h1>
+                <h1>Inventory Management</h1>
                 <div className="button-group">
                     <Link href="/login">
                         <button className="button">Login</button>

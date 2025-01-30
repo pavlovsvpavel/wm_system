@@ -77,7 +77,7 @@ const Navigation = () => {
                                     ) : null}
                                     <li>
                                         <Link href="/search">
-                                            <p>Search</p>
+                                            <p>Inventory</p>
                                         </Link>
                                     </li>
                                     {user?.is_staff && (
