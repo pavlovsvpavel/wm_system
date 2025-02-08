@@ -16,9 +16,9 @@
 
 &nbsp;&nbsp;&nbsp; :arrow_right: Searching by serial numbers in latest uploaded database:
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: serial number can be entered manually.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: Serial number can be entered manually.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: serial number can be scanned (QR code or barcode).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: Serial number can be scanned (QR code or barcode).
 
 &nbsp;&nbsp;&nbsp; :arrow_right: Settings menu for adding asset technical condition and warehouse name.
 
@@ -30,6 +30,6 @@
 
 &nbsp;&nbsp;&nbsp; :arrow_right: Routing menu for non-staff users (Custom UI menu):
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: based on selected date, the non-staff users can load routes.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: Based on selected date, the non-staff users can load routes.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: scanning QR codes or barcodes for specific entry in the route and saving them to database.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :large_blue_circle: Scanning QR codes or barcodes for specific entry in the route and saving them to database.
