@@ -43,6 +43,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
 
 ROOT_URLCONF = 'core.urls'
 
@@ -93,7 +94,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Development
 if DEBUG:
-    CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
     AUTH_PASSWORD_VALIDATORS = ()
 
 LANGUAGE_CODE = 'en-us'
