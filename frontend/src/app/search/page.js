@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,11 +20,67 @@ export default function SearchPage() {
     const { latestFile, setLatestFile } = useFile();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const [matches, setMatches] = useState([]);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef(null);
+    const inputRef = useRef(null);
+    const debounceTimerRef = useRef(null);
+    const lastSelectedMatch = useRef(null);
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     const { conditions, warehouses } = useConditionsAndWarehousesData(isAuthenticated, BASE_URL);
 
+    // Handle click outside dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Handle keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!showDropdown || matches.length === 0) return;
+
+            const items = dropdownRef.current?.querySelectorAll('.dropdown-item');
+            if (!items || items.length === 0) return;
+
+            const activeElement = document.activeElement;
+            let currentIndex = Array.from(items).findIndex(item => item === activeElement);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+                items[nextIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+                items[prevIndex].focus();
+            } else if (e.key === 'Enter' && currentIndex >= 0) {
+                e.preventDefault();
+                handleSelectMatch(matches[currentIndex]);
+            } else if (e.key === 'Escape') {
+                setShowDropdown(false);
+                inputRef.current?.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [showDropdown, matches]);
+
+    // Fetch latest file
     useEffect(() => {
         if (!isAuthenticated || latestFile) return;
 
@@ -44,11 +100,9 @@ export default function SearchPage() {
                     sessionStorage.setItem("latest_file_name", data.latest_file_name);
                     setLatestFile(data);
                     toast.success("Database loaded successfully.");
-
                 } else if (response.status === 204) {
                     toast.info("No database found. Please upload a database first.");
                     setLatestFile(null);
-
                 } else {
                     toast.error("Failed to fetch the latest database.");
                 }
@@ -58,15 +112,28 @@ export default function SearchPage() {
         };
 
         fetchLatestFile();
-
     }, [BASE_URL, isAuthenticated, latestFile, setLatestFile]);
 
+    // Handle QR code from URL
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const qrCodeValue = queryParams.get("qr");
+
+        if (qrCodeValue) {
+            setSearchQuery(qrCodeValue);
+            handleSearch(searchQuery);
+        }
+    }, [latestFile]);
+
+    // Search function with debounce
     const handleSearch = useCallback(
-        async (query = searchQuery) => {
+        async (query = searchQuery, suppressToast = false) => {
             const latestFile = sessionStorage.getItem('latest_file_id');
 
-            if (!query) {
-                toast.warning("Please enter a serial number or scan a QR Code.");
+            if (!query || query.length < 4) {
+                setSearchResults(null);
+                setMatches([]);
+                setShowDropdown(false);
                 return;
             }
 
@@ -75,6 +142,7 @@ export default function SearchPage() {
                 return;
             }
 
+            setIsSearching(true);
             try {
                 const token = localStorage.getItem("token");
 
@@ -91,13 +159,21 @@ export default function SearchPage() {
 
                 const data = await response.json();
 
-                if (data.pos_serial_number) {
-                    setSearchResults(data);
-                    setSelectedConditions([]);
-                    setSelectedWarehouse(data.scanned_outlet_whs_name || "");
+                if (Array.isArray(data) && data.length > 0) {
+                    setMatches(data);
+                    setShowDropdown(true);
 
-                    toast.success("Match found!");
+                    // Auto-select exact match
+                    const exactMatch = data.find(item => item.pos_serial_number === query);
+                    if (exactMatch) {
+                        handleSelectMatch(exactMatch, true);
+                        toast.success("Match found!");
+                    } else if (!suppressToast) {
+                        toast.success(`${data.length} matches found!`);
+                    }
                 } else {
+                    setMatches([]);
+                    setShowDropdown(false);
                     setSearchResults({
                         pos_serial_number: query,
                         outlet_whs_name: "",
@@ -106,20 +182,61 @@ export default function SearchPage() {
                         scanned_technical_condition: "",
                         scanned_outlet_whs_name: "",
                     });
-
-                    setSelectedConditions([]);
-                    setSelectedWarehouse("");
-
-                    toast.info('No match found. Click "Save" to add in the database.');
+                    if (!suppressToast) {
+                        toast.info("No match found!");
+                    }
                 }
-
             } catch (error) {
-                toast.error("Failed to perform search. Please try again.");
+                if (!suppressToast) {
+                    toast.error("Failed to perform search. Please try again.");
+                }
+            } finally {
+                setIsSearching(false);
             }
         },
         [searchQuery, isAuthenticated]
     );
 
+    // Debounced search effect
+    useEffect(() => {
+        // Skip API call if this update is from selecting a dropdown item
+        if (lastSelectedMatch.current === searchQuery) {
+            lastSelectedMatch.current = null;
+            return;
+        }
+
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        debounceTimerRef.current = setTimeout(() => {
+            handleSearch(searchQuery);
+        }, 500);
+
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, [searchQuery, handleSearch]);
+
+    const handleSelectMatch = (match, suppressToast = false) => {
+        // Store the match before state updates
+        lastSelectedMatch.current = match.pos_serial_number;
+
+        setSearchQuery(match.pos_serial_number);
+        setSearchResults(match);
+        setSelectedConditions([]);
+        setSelectedWarehouse(match.scanned_outlet_whs_name || "");
+        setMatches([]);
+        setShowDropdown(false);
+
+        if (match.pos_serial_number && !suppressToast) {
+            // toast.success("Data loaded!");
+        }
+    };
+
+    // Handle save
     const handleSave = async () => {
         const latestFile = sessionStorage.getItem('latest_file_id');
 
@@ -134,7 +251,6 @@ export default function SearchPage() {
             scanned_technical_condition: selectedConditions.join(', '),
             scanned_outlet_whs_name: selectedWarehouse,
         };
-
 
         try {
             const token = localStorage.getItem("token");
@@ -163,30 +279,14 @@ export default function SearchPage() {
                 setSelectedConditions([]);
                 setSelectedWarehouse("");
             } else {
-                // Handle non-200 responses
                 const errorData = await response.json();
                 toast.error(errorData.message || "Failed to save changes. Please try again.");
             }
-
         } catch (error) {
             console.error("Save error:", error);
             toast.error("Failed to save changes. Please try again.");
         }
-
     };
-
-    // Handle QR code value from query parameters
-    useEffect(() => {
-        const queryParams = new URLSearchParams(window.location.search);
-        const qrCodeValue = queryParams.get("qr");
-
-        if (qrCodeValue) {
-            setSearchQuery(qrCodeValue);
-        }
-
-    }, [latestFile]);
-
-
 
     const handleConditionChange = (condition) => {
         const updatedConditions = selectedConditions.includes(condition)
@@ -203,7 +303,6 @@ export default function SearchPage() {
         setIsModalOpen(false);
     };
 
-
     const handleWarehouseChange = (warehouse) => {
         setSelectedWarehouse(warehouse);
         setIsWarehouseModalOpen(false);
@@ -219,7 +318,7 @@ export default function SearchPage() {
 
     return (
         <AuthWrapper>
-            <div className="container">
+            <div className="container-search-page">
                 <h1>Inventory management</h1>
                 <div className="latest-file">
                     {latestFile && latestFile.latest_file_name ? (
@@ -232,17 +331,50 @@ export default function SearchPage() {
                     )}
                 </div>
 
-                <div className="search-input">
-                    <input
-                        type="text"
-                        placeholder="Enter serial number"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <button className="btn" onClick={() => handleSearch()}>Search</button>
-                    <button className="btn" onClick={() => router.push("/qr-scanner")}>
-                        Scan QR Code
-                    </button>
+                <div className="search-input-container" style={{ position: 'relative' }}>
+                    <div className="search-input" >
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Enter serial number"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={() => matches.length > 0 && setShowDropdown(true)}
+                        />
+
+                        <div className="search-input-buttons">
+                            {/* <button className="btn" onClick={() => handleSearch()}>Search</button> */}
+                            <button className="btn" onClick={() => router.push("/qr-scanner")}>
+                                Scan QR Code
+                            </button>
+                        </div>
+
+                    </div>
+                    {isSearching && <div style={{ position: 'absolute', left: '10px', top: '100%' }}>Searching...</div>}
+
+                    {showDropdown && matches.length > 0 && (
+                        <div
+                            ref={dropdownRef}
+                            className="dropdown-menu"
+                        >
+                            {matches.map((match, index) => (
+                                <button
+                                    key={index}
+                                    className="dropdown-item"
+                                    onClick={() => handleSelectMatch(match)}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                >
+                                    <div style={{ fontWeight: 'bold' }}>{match.pos_serial_number}</div>
+                                    {match.outlet_whs_name && (
+                                        <div style={{ color: '#666', fontSize: '0.9em' }}>
+                                            {match.outlet_whs_name}
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {searchResults && (

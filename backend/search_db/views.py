@@ -11,11 +11,11 @@ from upload_files.models import UploadedFile, UploadedFileRowData
 from upload_files.serializers import UploadedFileRowDataSerializer
 
 
-class QRCodeSearchView(api_generic_views.RetrieveAPIView):
+class QRCodeSearchView(api_generic_views.ListAPIView):
     serializer_class = QRCodeSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
 
-    def get_object(self):
+    def get_queryset(self):
         request: Request = self.request
         scanned_pos_serial_number = request.query_params.get('scanned_pos_serial_number')
         latest_file_id = request.query_params.get('latest_file_id')
@@ -24,15 +24,13 @@ class QRCodeSearchView(api_generic_views.RetrieveAPIView):
             latest_file_id = request.session.get('latest_file_id')
 
         if not latest_file_id:
-            return Response({'error': 'No latest file ID found in session or request.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return UploadedFileRowData.objects.none()
 
-        row = (UploadedFileRowData.objects.filter(
+        return UploadedFileRowData.objects.filter(
             file_id=latest_file_id,
-            pos_serial_number=scanned_pos_serial_number,
-        ).first())
-
-        return row
+            pos_serial_number__icontains=scanned_pos_serial_number,
+        ).order_by('pos_serial_number')
+    
 
 class QRCodeUpdateView(api_generic_views.UpdateAPIView):
     serializer_class = QRCodeSerializer

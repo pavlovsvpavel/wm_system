@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react"; // Added useRef
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from '../context/AuthContext';
 import DatePicker from "react-datepicker";
@@ -15,52 +15,31 @@ export default function RoutingPage() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [displayDate, setDisplayDate] = useState("");
     const [data, setData] = useState([]);
-    const [expandedCompany, setExpandedCompany] = useState(null);
+    const [expandedCompanies, setExpandedCompanies] = useState(new Set());
+    const [scannedOutletId, setScannedOutletId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [updatedData, setUpdatedData] = useState({});
-    // const [isUploading, setIsUploading] = useState(false);
-    // const [isDragging, setIsDragging] = useState(false);
-    // const [selectedFile, setSelectedFile] = useState(null);
-    // const [showUploadSection, setShowUploadSection] = useState(false);
-
-    // const uploadSectionRef = useRef(null);
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     useEffect(() => {
         if (selectedDate) {
-            const formattedDate = selectedDate.toISOString().split('T')[0]; // Ensure YYYY-MM-DD format
+            const formattedDate = selectedDate.toISOString().split('T')[0];
             setDisplayDate(formattedDate);
         }
     }, [selectedDate]);
 
-    // Handle clicks outside the upload section
-    // useEffect(() => {
-    //     const handleClickOutside = (event) => {
-    //         if (uploadSectionRef.current && !uploadSectionRef.current.contains(event.target)) {
-    //             setShowUploadSection(false);
-    //         }
-    //     };
-
-    //     // Attach the event listener
-    //     document.addEventListener("mousedown", handleClickOutside);
-
-    //     // Cleanup the event listener
-    //     return () => {
-    //         document.removeEventListener("mousedown", handleClickOutside);
-    //     };
-    // }, []);
-
     const handleDateChange = (date) => {
         setSelectedDate(date);
         if (date) {
-            const formattedDate = date.toISOString().split('T')[0]; // Ensure YYYY-MM-DD format
+            const formattedDate = date.toISOString().split('T')[0];
             setDisplayDate(formattedDate);
         } else {
             setDisplayDate("");
         }
     };
+
     const fetchData = async () => {
         if (!isAuthenticated) return;
         if (!selectedDate) {
@@ -85,9 +64,11 @@ export default function RoutingPage() {
                     Authorization: `Token ${token}`,
                 },
             });
+
             if (!response.ok) {
                 throw new Error("Failed to load data.");
             }
+
             const result = await response.json();
 
             if (result.length === 0) {
@@ -95,6 +76,7 @@ export default function RoutingPage() {
             } else {
                 toast.success("Routes loaded successfully.");
             }
+
             setData(result);
 
             const initialUpdatedData = result.reduce((acc, item) => {
@@ -103,6 +85,7 @@ export default function RoutingPage() {
                 };
                 return acc;
             }, {});
+
             setUpdatedData(initialUpdatedData);
         } catch (err) {
             toast.error("Failed to load data. Please try again.");
@@ -111,7 +94,19 @@ export default function RoutingPage() {
         }
     };
 
-    const handleQRScan = (id) => {
+    const toggleCompany = (companyName) => {
+        setExpandedCompanies(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(companyName)) {
+                newSet.delete(companyName);
+            } else {
+                newSet.add(companyName);
+            }
+            return newSet;
+        });
+    };
+
+    const handleQRScan = (id, companyName) => {
         const updatedState = {
             selectedDate,
             displayDate,
@@ -122,7 +117,8 @@ export default function RoutingPage() {
                     ...updatedData[id],
                     pos_serial_number: updatedData[id]?.pos_serial_number || ""
                 }
-            }
+            },
+            companyToExpand: companyName
         };
 
         localStorage.setItem("routingState", JSON.stringify(updatedState));
@@ -142,7 +138,6 @@ export default function RoutingPage() {
     const handleSave = async () => {
         if (!isAuthenticated) return;
         setLoading(true);
-        // setError("");
 
         try {
             const token = localStorage.getItem("token");
@@ -172,18 +167,24 @@ export default function RoutingPage() {
         const scanResult = localStorage.getItem('qrScanResult');
 
         if (savedState) {
-            const { selectedDate, displayDate, data, updatedData } = JSON.parse(savedState);
+            const { selectedDate, displayDate, data, updatedData, companyToExpand } = JSON.parse(savedState);
             setSelectedDate(selectedDate ? new Date(selectedDate) : null);
             setDisplayDate(displayDate);
             setData(data);
             setUpdatedData(updatedData);
+
+            if (companyToExpand) {
+                setExpandedCompanies(prev => new Set(prev).add(companyToExpand));
+            }
+
             localStorage.removeItem('routingState');
         }
-    
+
         if (scanResult) {
             const { id, pos_serial_number } = JSON.parse(scanResult);
-    
+
             if (id) {
+                setScannedOutletId(id);
                 setUpdatedData((prev) => ({
                     ...prev,
                     [id]: {
@@ -192,10 +193,24 @@ export default function RoutingPage() {
                     },
                 }));
             }
-    
+
             localStorage.removeItem('qrScanResult');
         }
     }, []);
+
+    useEffect(() => {
+        if (scannedOutletId && data.length > 0) {
+            const outlet = data.find(item => item.id === scannedOutletId);
+            if (outlet) {
+                setTimeout(() => {
+                    const element = document.getElementById(`outlet-${scannedOutletId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 100);
+            }
+        }
+    }, [scannedOutletId, data]);
 
     const groupedData = data.reduce((acc, item) => {
         const key = item.company_name;
@@ -206,242 +221,109 @@ export default function RoutingPage() {
         return acc;
     }, {});
 
-    // const handleFileChange = (event) => {
-    //     const file = event.target.files[0];
-    //     if (file) {
-    //         validateFile(file);
-    //     }
-    // };
-
-    // const handleDrop = (event) => {
-    //     event.preventDefault();
-    //     setIsDragging(false);
-
-    //     const file = event.dataTransfer.files[0];
-    //     if (file) {
-    //         validateFile(file);
-    //     }
-    // };
-
-    // const validateFile = (file) => {
-    //     if (!file.name.toLowerCase().endsWith(".xlsx") && !file.name.toLowerCase().endsWith(".xls")) {
-    //         setError("Invalid file type. Only Excel files are allowed.");
-    //         setSelectedFile(null);
-    //         return;
-    //     }
-    //     setSelectedFile(file);
-    // };
-
-    // const handleDragOver = (event) => {
-    //     event.preventDefault();
-    //     setIsDragging(true);
-    // };
-
-    // const handleDragLeave = () => {
-    //     setIsDragging(false);
-    // };
-
-    // const handleUpload = async () => {
-    //     if (!selectedFile) {
-    //         setError("Please select a file to upload.");
-    //         return;
-    //     }
-
-    //     setIsUploading(true);
-    //     setError("");
-
-    //     try {
-    //         const formData = new FormData();
-    //         formData.append("file", selectedFile);
-
-    //         const token = localStorage.getItem("token");
-    //         const response = await fetch(`${BASE_URL}/api/routing/upload-data/`, {
-    //             method: "POST",
-    //             headers: {
-    //                 Authorization: `Token ${token}`,
-    //             },
-    //             body: formData,
-    //         });
-
-    //         if (response.status === 201) {
-    //             toast.success("Data uploaded successfully!");
-    //             setSelectedFile(null);
-    //             document.getElementById("file").value = "";
-    //             setShowUploadSection(false);
-    //         } else {
-    //             const errorData = await response.json();
-    //             setError(errorData?.error || "Upload failed. Please try again.");
-    //         }
-    //     } catch (error) {
-    //         console.error("Upload error:", error);
-    //         setError("An error occurred. Please try again.");
-    //     } finally {
-    //         setIsUploading(false);
-    //     }
-    // };
-
     return (
         <AuthWrapper>
             <div className="container">
                 <h1>Routing</h1>
                 {error && <p className="error-message">{error}</p>}
 
-                {/* Toggleable Upload Section */}
-                {/* {user?.is_staff && (
-                    !showUploadSection ? (
-                        <button
-                            onClick={() => setShowUploadSection(true)}
-                            className="btn"
+                <div className="date-picker-container">
+                    <label htmlFor="date">Select date: </label>
+                    <DatePicker
+                        selected={selectedDate}
+                        onChange={handleDateChange}
+                        inline
+                        dateFormat="dd/MM/yyyy"
+                        className="date-picker-input"
+                        placeholderText="Select a date"
+                    />
+
+                    <div className="buttons">
+                        <button className="load-data-btn"
+                            onClick={fetchData}
+                            disabled={loading}
                         >
-                            Upload File
+                            {loading ? <div className="spinner"></div> : "Load Data"}
                         </button>
-                    ) : (
-                        <div ref={uploadSectionRef}>
-                            <div
-                                className={`dropzone ${isDragging ? "dragging" : ""}`}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
+                        <button className="btn"
+                            onClick={handleSave}
+                            disabled={loading || data.length === 0}
+                        >
+                            {loading ? <div className="spinner"></div> : "Save Data"}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="loaded-outlets">
+                    {Object.entries(groupedData).map(([companyName, outlets]) => (
+                        <div className="outlet" key={companyName}>
+                            <h5
+                                onClick={() => toggleCompany(companyName)}
+                                style={{
+                                    cursor: "pointer",
+                                    color: expandedCompanies.has(companyName) ? "#0070f3" : "#fff",
+                                }}
                             >
-                                <p>Drag and drop a file here, or</p>
-                                <div className="file-input-container">
-                                    <input
-                                        type="file"
-                                        id="file"
-                                        accept=".xlsx, .xls"
-                                        onChange={handleFileChange}
-                                    />
-                                    <label htmlFor="file" className="file-label">
-                                        Choose a file
-                                    </label>
+                                {companyName} &rArr; {outlets.length}
+                            </h5>
+
+                            {expandedCompanies.has(companyName) && (
+                                <div className="company-outlets-wrapper">
+                                    {outlets.map((outlet) => (
+                                        <div
+                                            id={`outlet-${outlet.id}`}
+                                            className="outlet-details"
+                                            key={outlet.id}
+                                            style={{
+                                                border: `3px solid ${outlet.type_of_route === 'install' ? 'green' : 'red'}`,
+                                            }}
+                                        >
+                                            <p className="outlet-sub-details-data">
+                                                <span>Outlet name:</span>
+                                                <span>{outlet.outlet_name}</span>
+                                            </p>
+                                            <div className="outlet-sub-details">
+                                                <p className="outlet-sub-details-data">
+                                                    <span>Delivery Address:</span>
+                                                    <span>{outlet.delivery_address}</span>
+                                                </p>
+                                                <p className="outlet-sub-details-data">
+                                                    <span>POS Serial Number: </span>
+                                                    <input
+                                                        style={{ color: "black" }}
+                                                        type="text"
+                                                        value={
+                                                            updatedData[outlet.id]?.pos_serial_number || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleInputChange(
+                                                                outlet.id,
+                                                                "pos_serial_number",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </p>
+                                            </div>
+                                            <p className="outlet-sub-details-data">
+                                                <span>Comment: </span>
+                                                <span>{outlet.comment}</span>
+                                            </p>
+                                            {outlet.type_of_route === 'install' && (
+                                                <button className="scan-btn"
+                                                    onClick={() => handleQRScan(outlet.id, outlet.company_name)}
+                                                >
+                                                    Scan QR Code
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
-                            </div> */}
-
-                            {/* {selectedFile && (
-                                <p className="selected-file">
-                                    Selected file: {selectedFile.name}
-                                </p>
                             )}
-
-                            <button
-                                onClick={handleUpload}
-                                disabled={isUploading || !selectedFile}
-                                className="upload-button"
-                            >
-                                {isUploading ? <div className="spinner"></div> : "Upload"}
-                            </button>
                         </div>
-                    )
-                )} */}
-
-            <div className="date-picker-container">
-                <label htmlFor="date">Select date: </label>
-                <DatePicker
-                    selected={selectedDate}
-                    onChange={handleDateChange}
-                    inline
-                    dateFormat="dd/MM/yyyy"
-                    className="date-picker-input"
-                    placeholderText="Select a date"
-                    popperPlacement="bottom-start"
-                    popperModifiers={{
-                        preventOverflow: {
-                            enabled: true,
-                            boundariesElement: 'viewport',
-                        },
-                        offset: {
-                            enabled: true,
-                            offset: '0, 10',
-                        },
-                    }}
-                />
-
-                <div className="buttons">
-                    <button className="load-data-btn"
-                        onClick={fetchData}
-                        disabled={loading}
-                    >
-                        {loading ? <div className="spinner"></div> : "Load Data"}
-                    </button>
-                    <button className="btn"
-                        onClick={handleSave}
-                        disabled={loading || data.length === 0}
-                    >
-                        {loading ? <div className="spinner"></div> : "Save Data"}
-                    </button>
+                    ))}
                 </div>
             </div>
-
-            <div className="loaded-outlets">
-                {Object.entries(groupedData).map(([companyName, outlets]) => (
-                    <div className="outlet"
-                        key={companyName}
-                    >
-                        <h5
-                            onClick={() =>
-                                setExpandedCompany(
-                                    expandedCompany === companyName ? null : companyName
-                                )
-                            }
-                            style={{
-                                cursor: "pointer",
-                                color: expandedCompany === companyName ? "#0070f3" : "#fff",
-                            }}
-                        >
-                            {companyName} &rArr; {outlets.length}
-                        </h5>
-                        {expandedCompany === companyName && (
-                            <div className="company-outlets-wrapper">
-                                {outlets.map((outlet) => (
-                                    <div
-                                        className="outlet-details"
-                                        key={outlet.id}
-                                        style={{
-                                            border: `3px solid ${outlet.type_of_route === 'install' ? 'green' : 'red'}`,
-                                        }}
-                                    >
-                                        <p className="outlet-sub-details-data">
-                                            <span>Outlet name:</span>
-                                            <span>{outlet.outlet_name}</span>
-                                        </p>
-                                        <div className="outlet-sub-details">
-                                            <p className="outlet-sub-details-data"><span>Delivery Address:</span> <span>{outlet.delivery_address}</span></p>
-                                            <p className="outlet-sub-details-data">
-                                                <span>POS Serial Number: {" "}</span>
-                                                <input
-                                                    style={{ color: "black" }}
-                                                    type="text"
-                                                    value={
-                                                        updatedData[outlet.id]?.pos_serial_number || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            outlet.id,
-                                                            "pos_serial_number",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </p>
-                                        </div>
-                                        <p className="outlet-sub-details-data">
-                                            <span>Comment: </span>
-                                            <span>{outlet.comment}</span>
-                                        </p>
-                                        {outlet.type_of_route === 'install' && (
-                                            <button className="scan-btn"
-                                                onClick={() => handleQRScan(outlet.id)}
-                                            >
-                                                Scan QR Code
-                                            </button>)}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
-        </AuthWrapper >
+        </AuthWrapper>
     );
 }
