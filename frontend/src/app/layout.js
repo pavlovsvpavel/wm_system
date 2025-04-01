@@ -9,6 +9,7 @@ import Navigation from "./components/navigation";
 import { usePathname } from "next/navigation";
 import { AuthProvider } from './context/AuthContext';
 import { FileProvider } from "./context/FileContext";
+import Footer from "./components/footer";
 
 const ubuntu = Ubuntu({
     weight: ["300", "400", "500", "700"],
@@ -47,17 +48,10 @@ export default function RootLayout({ children }) {
                     <FileProvider>
                         {shouldShowNavigation && <Navigation />}
                         {children}
+                        <Footer />
                     </FileProvider>
                 </AuthProvider>
-
                 <ToastContainer {...toastConfig} />
-                <footer className='footer'>
-                    <section className="recaptcha-terms">
-                        <p>This site is protected by reCAPTCHA and the Google</p>
-                        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and
-                        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer"> Terms of Service</a> apply.
-                    </section>
-                </footer>
             </body>
         </html>
     );

@@ -1,7 +1,6 @@
 .container-nav {
     display: flex;
     padding: 0 1em;
-    max-width: 1200px;
     margin: 0 auto;
 }
 
