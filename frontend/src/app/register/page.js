@@ -81,11 +81,9 @@ export default function RegisterScreen() {
 				toast.error(errorData?.detail || 'Registration failed. Please try again.');
 			}
 		} catch (error) {
-			// Handle network errors or other exceptions
+			// Only handle network errors, not HTTP errors
 			if (error instanceof TypeError && error.message === "Failed to fetch") {
-				toast.error('Network error. Please check your connection.');
-			} else {
-				toast.error('An error occurred during registration. Please try again.');
+				toast.error("Network error");
 			}
 		} finally {
 			setIsSubmitting(false);

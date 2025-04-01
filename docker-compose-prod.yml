@@ -55,9 +55,11 @@ services:
       - ./nginx/prod/logs:/var/log/nginx
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
+      - ./nginx/prod/custom_pages/50x.html:/usr/share/nginx/html/50x.html:ro
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       - backend
+      - frontend
 
