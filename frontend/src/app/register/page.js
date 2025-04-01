@@ -49,17 +49,45 @@ export default function RegisterScreen() {
 				}),
 			});
 
-			if (response.status === 201) {
+			if (response.ok) {
 				toast.success('Registration successful.');
 				router.push('/login');
+				return;
+			}
+
+			// Handle error responses
+			const errorData = await response.json();
+			console.log(errorData)
+
+			if (response.status === 400) {
+				if (errorData.recaptcha_token) {
+					toast.error(errorData.recaptcha_token);
+				} else if (errorData.username) {
+					toast.error(errorData.username[0]);
+				} else if (errorData.password) {
+					toast.error(errorData.password[0]);
+				} else {
+					toast.error('Invalid registration data. Please check your inputs.');
+				}
+			} else if (response.status === 403) {
+				if (errorData.recaptcha_token) {
+					toast.error(errorData.recaptcha_token);
+				} else {
+					toast.error('Access denied. Please try again.');
+				}
+			} else if (response.status === 503) {
+				toast.error('Could not verify reCAPTCHA. Please try again later.');
 			} else {
-				const errorData = await response.json()
-				toast.error(errorData?.username || errorData?.detail || 'Registration failed. Please try again.');
+				toast.error(errorData?.detail || 'Registration failed. Please try again.');
 			}
 		} catch (error) {
-			toast.error('An error occurred. Please try again.');
-		}
-		finally {
+			// Handle network errors or other exceptions
+			if (error instanceof TypeError && error.message === "Failed to fetch") {
+				toast.error('Network error. Please check your connection.');
+			} else {
+				toast.error('An error occurred during registration. Please try again.');
+			}
+		} finally {
 			setIsSubmitting(false);
 		}
 	};
@@ -132,7 +160,7 @@ export default function RegisterScreen() {
 				onClick={handleRegister}
 				className="login-register-button"
 				disabled={isSubmitting || !isLoaded}
-				style={{display:'flex', justifyContent:'center'}}
+				style={{ display: 'flex', justifyContent: 'center' }}
 			>
 				{isSubmitting ? <div className="spinner"></div> : 'Register'}
 			</button>

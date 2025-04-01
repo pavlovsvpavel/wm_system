@@ -29,7 +29,7 @@ export default function LoginScreen() {
         }
 
         setIsSubmitting(true);
-		setError('');
+        setError('');
 
         try {
             const recaptchaToken = await executeRecaptcha('login');
@@ -46,8 +46,21 @@ export default function LoginScreen() {
             });
 
             if (!response.ok) {
+                const errorData = await response.json();
                 if (response.status === 400) {
-                    toast.error("Invalid username or password.");
+                    if (errorData.recaptcha) {
+                        toast.error(errorData.recaptcha);
+                    } else {
+                        toast.error("Invalid username or password.");
+                    }
+                } else if (response.status === 403) {
+                    if (errorData.recaptcha) {
+                        toast.error(errorData.recaptcha);
+                    } else {
+                        toast.error("Access denied. Please try again.");
+                    }
+                } else if (response.status === 503) {
+                    toast.error("Could not verify reCAPTCHA. Please try again later.");
                 } else {
                     toast.error("An error occurred. Please try again.");
                 }
@@ -68,9 +81,13 @@ export default function LoginScreen() {
             router.push("/dashboard");
             toast.success('Login successful.')
         } catch (error) {
-            toast.error("Login error. Please try again.");
-        }
-        finally {
+            // Handle network errors or other exceptions
+            if (error instanceof TypeError && error.message === "Failed to fetch") {
+                toast.error("Network error. Please check your connection.");
+            } else {
+                toast.error("Login error. Please try again.");
+            }
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -119,7 +136,7 @@ export default function LoginScreen() {
                 onClick={handleLogin}
                 className="login-register-button"
                 disabled={isSubmitting || !isLoaded}
-                style={{display:'flex', justifyContent:'center'}}
+                style={{ display: 'flex', justifyContent: 'center' }}
             >
                 {isSubmitting ? <div className="spinner"></div> : 'Login'}
             </button>
