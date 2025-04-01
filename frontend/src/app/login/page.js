@@ -81,9 +81,11 @@ export default function LoginScreen() {
             router.push("/dashboard");
             toast.success('Login successful.')
         } catch (error) {
-            // Only handle network errors, not HTTP errors
+            // Handle network errors or other exceptions
             if (error instanceof TypeError && error.message === "Failed to fetch") {
-                toast.error("Network error");
+                toast.error("Network error. Please check your connection.");
+            } else {
+                toast.error("Login error. Please try again.");
             }
         } finally {
             setIsSubmitting(false);
