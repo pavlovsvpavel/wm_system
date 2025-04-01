@@ -58,5 +58,4 @@ services:
       - "443:443"
     depends_on:
       - backend
-      - frontend
 
