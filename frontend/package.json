@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env ENV=local next dev",
+    "dev": "cross-env ENV=local next dev -H 127.0.0.1",
     "local-build": "cross-env ENV=local next build",
     "local-start": "cross-env ENV=local next start",
     "docker-dev": "cross-env ENV=dev next dev",
@@ -18,9 +18,9 @@
     "@zxing/library": "^0.21.3",
     "dotenv": "^16.4.7",
     "next": "^15.2.4",
-    "react": "^19.0.0",
+    "react": "^19.1.0",
     "react-datepicker": "^7.6.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19.1.0",
     "react-icons": "^5.4.0",
     "react-toastify": "^11.0.2"
   },

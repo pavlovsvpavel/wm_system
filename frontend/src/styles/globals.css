@@ -24,7 +24,9 @@
     --color-pepsi-red: #ff1400;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: inherit;
 }
 
@@ -46,11 +48,22 @@ body {
     min-height: 100dvh;
 }
 
-body, input, textarea, button, select, option, table, td, th {
+body,
+input,
+textarea,
+button,
+select,
+option,
+table,
+td,
+th {
     font: inherit;
 }
 
-label, input, select, textarea {
+label,
+input,
+select,
+textarea {
     display: block;
     width: 100%;
 }
@@ -123,6 +136,28 @@ h6 {
 
 .btn:hover {
     background-color: var(--button-color-hover);
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1em;
+}
+
+.footer a {
+    color: var(--button-color);
+}
+
+.grecaptcha-badge {
+    visibility: hidden;
+}
+
+.recaptcha-terms {
+    font-size: 0.6em;
+    margin: 0 auto;
+    text-align: center;
 }
 
 @keyframes spin {

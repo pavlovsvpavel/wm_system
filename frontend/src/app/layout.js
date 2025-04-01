@@ -1,5 +1,6 @@
 "use client";
 
+import Script from 'next/script';
 import { Ubuntu } from "next/font/google";
 import "../styles/globals.css";
 import ToastContainer, { toastConfig } from "../utils/toastConfig";
@@ -34,8 +35,12 @@ export default function RootLayout({ children }) {
                     name="viewport"
                     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
                 />
-                <link rel="icon" href="/images/favicon.ico" type="image/x-icon"/>
+                <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
                 <title>Inventory Management</title>
+                <Script
+                    src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+                    strategy="afterInteractive"
+                />
             </head>
             <body className={ubuntu.variable}>
                 <AuthProvider>
@@ -46,6 +51,13 @@ export default function RootLayout({ children }) {
                 </AuthProvider>
 
                 <ToastContainer {...toastConfig} />
+                <footer className='footer'>
+                    <section className="recaptcha-terms">
+                        <p>This site is protected by reCAPTCHA and the Google</p>
+                        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and
+                        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer"> Terms of Service</a> apply.
+                    </section>
+                </footer>
             </body>
         </html>
     );

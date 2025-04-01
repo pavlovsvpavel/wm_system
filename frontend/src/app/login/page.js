@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useAuth } from '../context/AuthContext';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useRecaptcha from '../hooks/useRecaptcha.js';
+
 
 export default function LoginScreen() {
     const [username, setUsername] = useState("");
@@ -14,6 +16,8 @@ export default function LoginScreen() {
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { executeRecaptcha, isLoaded } = useRecaptcha();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
     const { login } = useAuth();
@@ -23,8 +27,12 @@ export default function LoginScreen() {
             toast.warning("Please enter both username and password.");
             return;
         }
-    
+
+        setIsSubmitting(true);
+		setError('');
+
         try {
+            const recaptchaToken = await executeRecaptcha('login');
             const response = await fetch(`${BASE_URL}/api/accounts/login/`, {
                 method: "POST",
                 headers: {
@@ -33,9 +41,10 @@ export default function LoginScreen() {
                 body: JSON.stringify({
                     username,
                     password,
+                    recaptcha_token: recaptchaToken,
                 }),
             });
-    
+
             if (!response.ok) {
                 if (response.status === 400) {
                     toast.error("Invalid username or password.");
@@ -44,24 +53,27 @@ export default function LoginScreen() {
                 }
                 return;
             }
-    
+
             const data = await response.json();
-    
+
             if (!data.token) {
                 setError("Invalid token.");
                 return;
             }
-    
+
             const { token } = data;
             const { user } = data;
-    
+
             login(token, user);
             router.push("/dashboard");
             toast.success('Login successful.')
         } catch (error) {
             toast.error("Login error. Please try again.");
         }
-    };    
+        finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const togglePasswordVisibility = () => {
         setShowPassword((prevState) => !prevState);
@@ -71,7 +83,7 @@ export default function LoginScreen() {
         <div className="container">
             <h1>Login</h1>
             {error && <p className="error-message">{error}</p>}
-            
+
             <div className="form-group">
                 <label htmlFor="username">Username</label>
                 <input
@@ -103,8 +115,13 @@ export default function LoginScreen() {
                 </div>
             </div>
 
-            <button onClick={handleLogin} className="login-register-button">
-                Login
+            <button
+                onClick={handleLogin}
+                className="login-register-button"
+                disabled={isSubmitting || !isLoaded}
+                style={{display:'flex', justifyContent:'center'}}
+            >
+                {isSubmitting ? <div className="spinner"></div> : 'Login'}
             </button>
 
             <p className="login-register-link">

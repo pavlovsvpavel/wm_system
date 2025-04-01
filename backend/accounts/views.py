@@ -1,8 +1,11 @@
+import requests
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken import views as token_views
 from rest_framework import generics as api_generic_views, status, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import ValidationError
 
 from accounts.mixins import GetModelQuerySetMixin
 from accounts.models import UserAccountTechnicalCondition, UserAccountWhsName
@@ -17,9 +20,103 @@ class RegisterApiView(api_generic_views.CreateAPIView):
     queryset = UserModel.objects.all()
     serializer_class = UserRegisterSerializer
 
+    def create(self, request, *args, **kwargs):
+        recaptcha_token = request.data.get('recaptcha_token')
+        
+        if not recaptcha_token:
+            raise ValidationError(
+                {'recaptcha_token': 'This field is required'},
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verify reCAPTCHA token with Google's API
+        try:
+            recaptcha_response = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': recaptcha_token
+                },
+                timeout=5
+            )
+            recaptcha_response.raise_for_status()
+            recaptcha_data = recaptcha_response.json()
+            
+            if not recaptcha_data.get('success'):
+                raise ValidationError(
+                    {'recaptcha_token': 'Invalid or expired reCAPTCHA token'},
+                    code=status.HTTP_400_BAD_REQUEST
+                )
+                
+            if recaptcha_data.get('score', 0) < 0.5:
+                raise ValidationError(
+                    {'recaptcha_token': 'reCAPTCHA verification failed (low score)'},
+                    code=status.HTTP_400_BAD_REQUEST
+                )
+                
+        except requests.exceptions.RequestException as e:
+            raise ValidationError(
+                {'recaptcha_token': 'Could not verify reCAPTCHA'},
+                code=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        
+        # Proceed with normal DRF create flow
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+
 
 class LoginApiView(token_views.ObtainAuthToken):
+    def verify_recaptcha(self, recaptcha_token):
+        # Verify reCAPTCHA token with Google's API
+        try:
+            response = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': recaptcha_token
+                },
+                timeout=3
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            # Check if reCAPTCHA was successful and meets score threshold
+            if not data.get('success') or data.get('score', 0) < 0.3:
+                raise ValidationError(
+                    {'recaptcha': 'Failed reCAPTCHA verification'},
+                    code=status.HTTP_403_FORBIDDEN
+                )
+            return data
+        except requests.RequestException as e:
+            raise ValidationError(
+                {'recaptcha': 'Could not verify reCAPTCHA'},
+                code=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        
     def post(self, request, *args, **kwargs):
+        recaptcha_token = request.data.get('recaptcha_token')
+        if not recaptcha_token:
+            return Response(
+                {'error': 'reCAPTCHA token is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            self.verify_recaptcha(recaptcha_token)
+        except ValidationError as e:
+            return Response(
+                e.detail,
+                status=e.status_code
+            )
+        
         serializer = self.serializer_class(data=request.data, context={'request': request})
         if not serializer.is_valid():
             return Response(
