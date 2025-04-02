@@ -5,15 +5,16 @@
     margin: 0 auto;
     max-width: 500px;
     padding: 2em;
+    box-sizing: border-box;
 }
 
 .scanner-window {
     width: 100%;
-    max-width: 400px;
-    height: 400px;
+    aspect-ratio: 1/1;
     position: relative;
     margin: 0 auto;
-    
+    max-width: 90vw;
+    max-height: 80vh;
 }
 
 .video-element {
@@ -36,7 +37,7 @@
 }
 
 .torch-button svg {
-    font-size: 1.5em;
+    font-size: 2em;
 }
 
 .control-panel {

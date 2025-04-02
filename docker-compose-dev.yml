@@ -21,7 +21,7 @@ services:
       - ./backend/envs/.env.dev
     depends_on:
       - postgres
-    entrypoint: /entrypoint.sh
+    # entrypoint: /entrypoint.sh
     volumes:
       - ./backend/staticfiles:/home/app/backend/static_files
       - ./backend/mediafiles:/home/app/backend/mediafiles

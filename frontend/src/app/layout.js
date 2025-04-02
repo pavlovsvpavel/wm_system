@@ -44,14 +44,16 @@ export default function RootLayout({ children }) {
                 />
             </head>
             <body className={ubuntu.variable}>
-                <AuthProvider>
-                    <FileProvider>
-                        {shouldShowNavigation && <Navigation />}
-                        {children}
-                        <Footer />
-                    </FileProvider>
-                </AuthProvider>
-                <ToastContainer {...toastConfig} />
+                <div className='site'>
+                    <AuthProvider>
+                        <FileProvider>
+                            {shouldShowNavigation && <Navigation />}
+                            {children}
+                            <Footer />
+                        </FileProvider>
+                    </AuthProvider>
+                    <ToastContainer {...toastConfig} />
+                </div>
             </body>
         </html>
     );
