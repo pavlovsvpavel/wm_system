@@ -365,7 +365,7 @@ export default function SearchPage() {
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
                                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                                 >
-                                    <div style={{ fontWeight: 'bold' }}>{match.pos_serial_number}</div>
+                                    <div style={{ fontWeight: 'bold' }}>{match.pos_serial_number} - {match.pos_type}</div>
                                     {match.outlet_whs_name && (
                                         <div style={{ color: '#666', fontSize: '0.9em' }}>
                                             {match.outlet_whs_name}
