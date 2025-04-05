@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { toast } from "react-toastify";
-import { useRouter, usePathname } from "next/navigation";
+import {useState, useEffect, useCallback, useMemo} from "react";
+import {toast} from "react-toastify";
+import {useRouter, usePathname} from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
 
 export function useAuthState() {
@@ -10,84 +10,80 @@ export function useAuthState() {
     const router = useRouter();
     const pathname = usePathname();
 
-    const safeSetLocalStorage = (key, value) => {
+    const setAuthData = useCallback((token, userData) => {
         try {
-            localStorage.setItem(key, value);
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(userData));
+            setIsAuthenticated(true);
+            setUser(userData);
         } catch (error) {
-            console.error("Failed to set localStorage item:", error);
+            toast.error("Failed to save login information. Please try again.");
+            logout();
         }
-    };
+    }, []);
 
-    const safeRemoveLocalStorage = (key) => {
-        try {
-            localStorage.removeItem(key);
-        } catch (error) {
-            console.error("Failed to remove localStorage item:", error);
-        }
-    };
+    const clearAuthData = useCallback(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("latest_file_id");
+        sessionStorage.removeItem("latest_file_name");
+
+        setIsAuthenticated(false);
+        setUser(null);
+    }, []);
+
+    const logout = useCallback(() => {
+        clearAuthData();
+        window.location.href = "/";
+    }, [clearAuthData]);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const user = JSON.parse(localStorage.getItem("user"));
+        try {
+            const token = localStorage.getItem("token");
+            const storedUser = localStorage.getItem("user");
+            const parsedUser = storedUser ? JSON.parse(storedUser) : null;
 
-        if (token && user) {
-            setIsAuthenticated(true);
-            setUser(user);
-        } else {
-            safeRemoveLocalStorage("token");
-            safeRemoveLocalStorage("user");
+            if (token && parsedUser) {
+                setIsAuthenticated(true);
+                setUser(parsedUser);
+            } else {
+                clearAuthData();
+            }
+        } catch {
+            clearAuthData();
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
-    }, []);
+    }, [clearAuthData]);
 
     useEffect(() => {
         const handleStorageChange = (event) => {
             if (event.key === "token" || event.key === "user") {
-                const token = localStorage.getItem("token");
-                const user = JSON.parse(localStorage.getItem("user"));
+                try {
+                    const token = localStorage.getItem("token");
+                    const storedUser = localStorage.getItem("user");
+                    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
 
-                if (token && user) {
-                    setIsAuthenticated(true);
-                    setUser(user);
-                } else {
-                    setIsAuthenticated(false);
-                    setUser(null);
+                    setIsAuthenticated(!!token && !!parsedUser);
+                    setUser(parsedUser);
+                } catch {
+                    clearAuthData();
                 }
             }
         };
 
         window.addEventListener("storage", handleStorageChange);
         return () => window.removeEventListener("storage", handleStorageChange);
-    }, []);
+    }, [clearAuthData]);
 
-    const publicRoutes = ["/", "/login", "/register"];
+    const publicRoutes = useMemo(() => ["/", "/login", "/register"], []);
 
     useEffect(() => {
-        if (isLoading) return;
-    
-        if (!isAuthenticated && !publicRoutes.includes(pathname)) {
-            if (pathname !== '/') {
-                router.push('/login');
-                toast.warning("You are not authenticated. Please log in.");
-            }
+        if (!isLoading && !isAuthenticated && !publicRoutes.includes(pathname)) {
+            router.push("/login");
+            toast.warning("You are not authenticated. Please log in.");
         }
-    }, [isAuthenticated, isLoading, pathname, router]);
+    }, [isAuthenticated, isLoading, pathname, publicRoutes, router]);
 
-    const login = (token, user) => {
-        
-        safeSetLocalStorage("token", token);
-        safeSetLocalStorage("user", JSON.stringify(user));
-        setIsAuthenticated(true);
-        setUser(user);
-    };
-
-    const logout = () => {
-        safeRemoveLocalStorage("token");
-        safeRemoveLocalStorage("user");
-        sessionStorage.removeItem("latest_file_id");
-        sessionStorage.removeItem("latest_file_name");
-        window.location.href = '/'; // Force a full page reload
-    };
-
-    return { isAuthenticated, isLoading, user, login, logout };
+    return {isAuthenticated, isLoading, user, login: setAuthData, logout};
 }

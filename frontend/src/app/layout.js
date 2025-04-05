@@ -18,7 +18,7 @@ const ubuntu = Ubuntu({
 });
 
 export default function RootLayout({ children }) {
-    const pathname = usePathname();;
+    const pathname = usePathname();
 
     const showNavigationRoutes = ["/dashboard", "/upload", "/export", "/search", "/qr-scanner", "/user-options", "/routing"];
     const hideNavigationRoutes = ["/", "/login", "/register"];
