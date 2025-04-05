@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http.response import HttpResponseRedirect
 from import_export.admin import ExportMixin
 from rangefilter.filters import DateRangeFilter
 from accounts.mixins import IsStaffUserMixin
@@ -34,10 +35,23 @@ class UploadedFileRowDataAdmin(IsStaffUserMixin, ExportMixin, admin.ModelAdmin):
         return False
 
     def export_selected_qr_pdf(self, request, queryset):
-        queryset = queryset.filter(scanned_technical_condition="QR")
+        queryset = queryset.filter(scanned_technical_condition__icontains="QR")
+        unique_files = queryset.order_by().values_list('file__name', flat=True).distinct()
+        file_names = ", ".join(str(name) for name in unique_files if name)
+
         if not queryset.exists():
-            self.message_user(request, "No selected items with QR flag", level='warning')
+            self.message_user(request, f"No selected items with QR flag in selected file", level='warning')
             return
+
+        if len(unique_files) > 1:
+            self.message_user(
+                request,
+                f"Error: Multiple files selected ({file_names}). "
+                "Please select only one file.",
+                level='error'
+            )
+            return HttpResponseRedirect(request.get_full_path())
+
         return generate_pdf(queryset)
 
     export_selected_qr_pdf.short_description = "Export selected items with QR flags to PDF"
