@@ -47,7 +47,7 @@ export function useFetchFiles(isAuthenticated, BASE_URL) {
 
         // Cleanup function to abort the fetch request
         return () => controller.abort();
-    }, [isAuthenticated, loading]);
+    }, [isAuthenticated, BASE_URL, loading]);
 
     return { files, loading, error };
 }
