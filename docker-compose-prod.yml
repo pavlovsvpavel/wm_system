@@ -48,6 +48,7 @@ services:
     image: nginx
     restart: on-failure
     volumes:
+      - ./nginx/prod/nginx.conf:/etc/nginx/nginx.conf
       - ./backend/staticfiles:/home/app/backend/static_files
       - ./backend/mediafiles:/home/app/backend/mediafiles
       - ./backend/locale:/home/app/backend/locale
