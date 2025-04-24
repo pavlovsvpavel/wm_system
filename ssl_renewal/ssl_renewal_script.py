@@ -16,11 +16,6 @@ def log_message(message, log_file=f"{SSL_RENEWAL_DIR}/renewal.log"):
     with open(log_file, "a") as f:
         f.write(f"[{timestamp}] {message}\n")
 
-print(APP_DIR)
-print(CERTBOT_COMPOSE_FILE)
-print(DOCKER_COMPOSE_FILE)
-print(SSL_RENEWAL_DIR)
-
 def ssl_renewal():
     """Renewal for Let's Encrypt SSL certificate"""
     try:
