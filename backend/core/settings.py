@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
-from decouple import config, Csv, AutoConfig
+from decouple import Csv, AutoConfig
 
-config = AutoConfig('envs')
+config = AutoConfig(search_path='envs')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
