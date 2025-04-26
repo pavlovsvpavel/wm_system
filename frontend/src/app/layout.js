@@ -34,7 +34,11 @@ export default function RootLayout({ children }) {
             <head>
                 <meta
                     name="viewport"
-                    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+                    content="width=device-width, initial-scale=1.0"
+                />
+                <meta
+                    name="description"
+                    content="Manage your inventory efficiently with our Inventory Management system."
                 />
                 <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
                 <title>Inventory Management</title>
