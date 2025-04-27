@@ -1,4 +1,3 @@
-from rest_framework.exceptions import NotFound
 from rest_framework.request import Request
 from rest_framework import status, permissions, serializers
 from rest_framework import generics as api_generic_views
@@ -7,7 +6,7 @@ from django.db import transaction
 
 from accounts.permissions import IsAuthenticatedPermission
 from search_db.serializers import QRCodeSerializer
-from upload_files.models import UploadedFile, UploadedFileRowData
+from upload_files.models import UploadedFileRowData
 from upload_files.serializers import UploadedFileRowDataSerializer
 
 
@@ -30,7 +29,7 @@ class QRCodeSearchView(api_generic_views.ListAPIView):
             file_id=latest_file_id,
             pos_serial_number__icontains=scanned_pos_serial_number,
         ).order_by('pos_serial_number')
-    
+
 
 class QRCodeUpdateView(api_generic_views.UpdateAPIView):
     serializer_class = QRCodeSerializer
@@ -44,58 +43,48 @@ class QRCodeUpdateView(api_generic_views.UpdateAPIView):
             return Response({'error': 'No file ID found in session. Cannot proceed with update.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Retrieve the scanned POS serial number from the request data
         pos_serial_number = request.data.get('pos_serial_number')
-
         if not pos_serial_number:
             return Response({'error': 'No scanned POS serial number provided.'},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        # Retrieve the file using the latest_file_id from the session storage
-        try:
-            uploaded_file = UploadedFile.objects.only('id').get(id=latest_file_id)
-        except UploadedFile.DoesNotExist:
-            raise NotFound(detail="Uploaded file with the latest file ID not found.")
 
         serializer = self.get_serializer(data=request.data, context={'user': user})
 
         try:
             serializer.is_valid(raise_exception=True)
         except serializers.ValidationError as e:
-            print(f"Validation error: {e}")
-            return Response({'error': 'Validation failed', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Validation failed', 'details': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             with transaction.atomic():
-                row_instance = UploadedFileRowData.objects.filter(
-                    file_id=uploaded_file.id,
-                    pos_serial_number=serializer.validated_data['pos_serial_number'],
-                ).first()
+                updated_count = UploadedFileRowData.objects.filter(
+                    file_id=latest_file_id,
+                    pos_serial_number=serializer.validated_data['pos_serial_number']
+                ).update(
+                    scanned_technical_condition=serializer.validated_data.get('scanned_technical_condition', ''),
+                    scanned_outlet_whs_name=serializer.validated_data.get('scanned_outlet_whs_name', ''),
+                    user=user
+                )
 
-                if row_instance:
-                    row_instance.scanned_technical_condition = serializer.validated_data.get(
-                        'scanned_technical_condition', '')
-                    row_instance.scanned_outlet_whs_name = serializer.validated_data.get('scanned_outlet_whs_name', '')
-                    row_instance.user  = self.request.user
-                    row_instance.save()
-
+                if updated_count > 0:
                     return Response({
-                        'message': 'Row updated successfully!',
-                        'scanned_pos_serial_number': serializer.validated_data['pos_serial_number'],
-                        'file_id': uploaded_file.id,
+                        'message': 'Record updated successfully!',
+                        'scanned_pos_serial_number': pos_serial_number,
+                        'file_id': latest_file_id,
                         'scanned_technical_condition': serializer.validated_data.get('scanned_technical_condition', ''),
                         'scanned_outlet_whs_name': serializer.validated_data.get('scanned_outlet_whs_name', ''),
                     }, status=status.HTTP_200_OK)
 
                 new_row = UploadedFileRowData.objects.create(
-                    file_id=uploaded_file.id,
-                    pos_serial_number=serializer.validated_data['pos_serial_number'],
+                    file_id=latest_file_id,
+                    pos_serial_number=pos_serial_number,
                     scanned_technical_condition=serializer.validated_data.get('scanned_technical_condition', ''),
                     scanned_outlet_whs_name=serializer.validated_data.get('scanned_outlet_whs_name', ''),
                     user=user,
                 )
                 return Response({
-                    'message': 'New row added successfully!',
+                    'message': 'New record added successfully!',
                     'row': UploadedFileRowDataSerializer(new_row).data,
                 }, status=status.HTTP_201_CREATED)
 

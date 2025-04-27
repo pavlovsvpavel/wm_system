@@ -1,5 +1,4 @@
-import datetime
-import pandas as pd
+from django.utils import timezone
 from django.db import transaction
 from rest_framework import generics as api_generic_views
 from rest_framework.permissions import IsAuthenticated
@@ -9,50 +8,6 @@ from rest_framework import status
 from accounts.permissions import IsAuthenticatedPermission
 from routing.models import RoutingUploadedFileData
 from routing.serializers import RoutingUploadedFileDataSerializer
-
-
-# class RoutingUploadedFileDataView(api_generic_views.CreateAPIView):
-#     serializer_class = RoutingUploadedFileDataSerializer
-#     permission_classes = [IsAuthenticated, IsAuthenticatedPermission]
-#
-#     def post(self, request, *args, **kwargs):
-#         file = request.FILES.get('file')
-#
-#         if not file or not file.name.endswith('.xlsx'):
-#             return Response({"error": "Please upload a valid .xlsx file."}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         try:
-#             with transaction.atomic():
-#                 try:
-#                     # Load the Excel file into a DataFrame
-#                     df = pd.read_excel(file)
-#                     df = df.fillna('')
-#
-#                     # Filter out rows with empty dates
-#                     df = df.dropna(subset=['Fact Delivery Date'])
-#
-#                     for _, row in df.iterrows():
-#                         RoutingUploadedFileData.objects.create(
-#                             type_of_route=row['Type of route'],
-#                             sr_name=row['Organizational Structure Object'],
-#                             region=row['Geography Object'],
-#                             company_name=row[' Legal Name of an Outlet'],
-#                             outlet_name=row['Actual Name of an Outlet'],
-#                             delivery_address=row['Delivery Address'],
-#                             pos_model=row['POS Equipment'],
-#                             pos_serial_number=row['Serial Number'],
-#                             comment=row['Comment'],
-#                             transport_company=row['Additional Comment'],
-#                             date_for_delivery=row['Fact Delivery Date'],
-#                         )
-#
-#                     return Response({"message": "Data uploaded successfully."}, status=status.HTTP_201_CREATED)
-#
-#                 except Exception as e:
-#                     return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         except Exception as e:
-#             return Response({'error': f"Unexpected error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RoutingRetrieveDataView(api_generic_views.RetrieveAPIView):
@@ -80,22 +35,44 @@ class RoutingUpdateDataView(api_generic_views.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         updated_data = request.data
+        record_ids = list(updated_data.keys())
+        user = request.user
+        current_time = timezone.now()
 
-        for record_id, fields in updated_data.items():
-            try:
-                record = RoutingUploadedFileData.objects.get(id=record_id)
+        try:
+            with transaction.atomic():
+                records = RoutingUploadedFileData.objects.in_bulk(record_ids)
 
-                serializer = self.serializer_class(record, data=fields, partial=True)
-                serializer.is_valid(raise_exception=True)
+                updates = []
+                for record_id, fields in updated_data.items():
+                    record = records.get(int(record_id))
+                    if not record:
+                        continue  # Skip non-existent records
 
-                if hasattr(record, 'user'):
-                    serializer.validated_data['user'] = request.user
+                    serializer = self.serializer_class(record, data=fields, partial=True)
+                    serializer.is_valid(raise_exception=True)
 
-                serializer.save()
-            except RoutingUploadedFileData.DoesNotExist:
-                # If the record with the given id does not exist, skip it
-                continue
-            except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                    for field, value in serializer.validated_data.items():
+                        setattr(record, field, value)
+                    if hasattr(record, 'user'):
+                        record.user = user
 
-        return Response({"message": "Data saved successfully."}, status=status.HTTP_200_OK)
+                    # Manually update the timestamp
+                    record.updated_at = current_time
+                    updates.append(record)
+
+                # Bulk update all records in one query
+                if updates:
+                    model_fields = [f.name for f in RoutingUploadedFileData._meta.fields
+                                    if f.name not in ['id', 'created_at']]
+
+                    RoutingUploadedFileData.objects.bulk_update(
+                        updates,
+                        fields=model_fields
+                    )
+
+                return Response({"message": f"Updated {len(updates)} records successfully."},
+                                status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

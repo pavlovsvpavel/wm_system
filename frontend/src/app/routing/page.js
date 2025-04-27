@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from '../context/AuthContext';
+import {useState, useEffect} from "react";
+import {useRouter} from "next/navigation";
+import {useAuth} from '../context/AuthContext';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AuthWrapper from "../components/auth/authWrapper";
 
 export default function RoutingPage() {
     const router = useRouter();
-    const { isAuthenticated, user } = useAuth();
+    const {isAuthenticated, user} = useAuth();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [displayDate, setDisplayDate] = useState("");
     const [data, setData] = useState([]);
@@ -151,10 +151,13 @@ export default function RoutingPage() {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to save data.");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to save data.");
             }
 
-            toast.success("Saved successfully.");
+            const data = await response.json();
+            toast.success(data.message || "Saved successfully.");
+
         } catch (err) {
             toast.error("Failed to save data. Please try again.");
         } finally {
@@ -167,7 +170,7 @@ export default function RoutingPage() {
         const scanResult = localStorage.getItem('qrScanResult');
 
         if (savedState) {
-            const { selectedDate, displayDate, data, updatedData, companyToExpand } = JSON.parse(savedState);
+            const {selectedDate, displayDate, data, updatedData, companyToExpand} = JSON.parse(savedState);
             setSelectedDate(selectedDate ? new Date(selectedDate) : null);
             setDisplayDate(displayDate);
             setData(data);
@@ -181,7 +184,7 @@ export default function RoutingPage() {
         }
 
         if (scanResult) {
-            const { id, pos_serial_number } = JSON.parse(scanResult);
+            const {id, pos_serial_number} = JSON.parse(scanResult);
 
             if (id) {
                 setScannedOutletId(id);
@@ -205,7 +208,7 @@ export default function RoutingPage() {
                 setTimeout(() => {
                     const element = document.getElementById(`outlet-${scannedOutletId}`);
                     if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        element.scrollIntoView({behavior: 'smooth', block: 'nearest'});
                     }
                 }, 100);
             }
@@ -240,14 +243,14 @@ export default function RoutingPage() {
 
                     <div className="buttons">
                         <button className="load-data-btn"
-                            onClick={fetchData}
-                            disabled={loading}
+                                onClick={fetchData}
+                                disabled={loading}
                         >
                             {loading ? <div className="spinner"></div> : "Load Data"}
                         </button>
                         <button className="btn"
-                            onClick={handleSave}
-                            disabled={loading || data.length === 0}
+                                onClick={handleSave}
+                                disabled={loading || data.length === 0}
                         >
                             {loading ? <div className="spinner"></div> : "Save Data"}
                         </button>
@@ -290,7 +293,7 @@ export default function RoutingPage() {
                                                 <p className="outlet-sub-details-data">
                                                     <span>POS Serial Number: </span>
                                                     <input
-                                                        style={{ color: "black" }}
+                                                        style={{color: "black"}}
                                                         type="text"
                                                         value={
                                                             updatedData[outlet.id]?.pos_serial_number || ""
@@ -311,7 +314,7 @@ export default function RoutingPage() {
                                             </p>
                                             {outlet.type_of_route === 'install' && (
                                                 <button className="scan-btn"
-                                                    onClick={() => handleQRScan(outlet.id, outlet.company_name)}
+                                                        onClick={() => handleQRScan(outlet.id, outlet.company_name)}
                                                 >
                                                     Scan QR Code
                                                 </button>

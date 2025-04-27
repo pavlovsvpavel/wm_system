@@ -1,5 +1,4 @@
 import warnings
-
 import pandas as pd
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -17,6 +16,7 @@ UserModel = get_user_model()
 # Suppress the warning for headers and footers
 warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')
 
+
 class UploadFileView(api_generic_views.CreateAPIView):
     serializer_class = UploadedFileSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthenticatedPermission]
@@ -30,7 +30,8 @@ class UploadFileView(api_generic_views.CreateAPIView):
             return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not file.name.lower().endswith(('.xlsx', '.xls')):
-            return Response({'error': 'Invalid file type. Only Excel files are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid file type. Only Excel files are allowed.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if filtered_queryset.filter(name=file.name).exists():
             return Response({'error': 'A file with this name already exists for this user.'},
@@ -50,7 +51,8 @@ class UploadFileView(api_generic_views.CreateAPIView):
 
                 required_columns = {'POS SN', 'Outlet/WHS name', 'Scanned_Technical_condition', 'Scanned_WHS'}
                 if not required_columns.issubset(actual_columns):
-                    return Response({'error': f'Missing required columns: {required_columns - actual_columns}'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': f'Missing required columns: {required_columns - actual_columns}'},
+                                    status=status.HTTP_400_BAD_REQUEST)
 
                 uploaded_file.save()
 
@@ -113,7 +115,7 @@ class ListUploadedFilesView(GetModelQuerySetMixin, api_generic_views.ListAPIView
     def get(self, request, *args, **kwargs):
         try:
             filtered_queryset = self.get_queryset(request, self.model)
-            uploaded_files = filtered_queryset
+            uploaded_files = filtered_queryset.order_by('-upload_date')
 
             if not uploaded_files.exists():
                 return Response(
@@ -165,4 +167,4 @@ class RetrieveLatestFileIdView(GetModelQuerySetMixin, api_generic_views.Retrieve
 
         except Exception as e:
             return Response({'error': f"Failed to fetch the latest file id: {e}"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
