@@ -6,6 +6,7 @@ on:
 jobs:
   deploy_to_prod_environment:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Deploy to GCP
         uses: appleboy/ssh-action@master
