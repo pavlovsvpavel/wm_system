@@ -4,10 +4,14 @@ import datetime
 import sys
 from pathlib import Path
 
+from google.cloud import storage
+
 CONTAINER_NAME = "wm_app_postgres"
 POSTGRES_USER = "postgres"
 BACKUP_DIR = Path(__file__).parent
 LOG_FILE = BACKUP_DIR / "backup.log"
+GCS_BUCKET_NAME = "wm-system-backup"
+GCS_DESTINATION_FOLDER = "postgres"
 
 
 def log_message(message, level="INFO"):
@@ -17,6 +21,7 @@ def log_message(message, level="INFO"):
 
     with open(LOG_FILE, "a") as f:
         f.write(log_entry)
+        print(log_entry)
 
 
 def is_container_running():
@@ -38,12 +43,10 @@ def create_backup():
     try:
         log_message(f"Starting PostgreSQL backup from container {CONTAINER_NAME}...")
 
-        # Check if container is running
         if not is_container_running():
             log_message(f"Container {CONTAINER_NAME} is not running", "ERROR")
-            return False
+            return None
 
-        # Generate filename with timestamp
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         backup_file = f"pg_backup_{timestamp}.sql"
         backup_path = Path(BACKUP_DIR, backup_file)
@@ -60,19 +63,19 @@ def create_backup():
 
         log_message(f"Backup successfully created at: {backup_path}")
 
-        # Compress the backup
-        compress_backup(backup_path)
+        # Compress the backup and get the compressed path
+        compressed_path = compress_backup(backup_path)
 
-        return True
+        return compressed_path
 
     except subprocess.CalledProcessError as err:
         error_msg = err.stderr.strip() if err.stderr else str(err)
         log_message(f"Backup failed. Command failed with return code {err.returncode}. Error: {error_msg}", "ERROR")
-        return False
+        return None
 
     except Exception as err:
         log_message(f"Unexpected error during backup: {str(err)}", "ERROR")
-        return False
+        return None
 
 
 def compress_backup(backup_path):
@@ -84,22 +87,50 @@ def compress_backup(backup_path):
         if result.stderr:
             log_message(f"Compression warnings: {result.stderr.strip()}", "WARNING")
 
+        compressed_path = backup_path.with_suffix(backup_path.suffix + ".gz")
         log_message(f"Successfully compressed backup to: {backup_path}.gz")
+
+        return compressed_path
 
     except subprocess.CalledProcessError as err:
         error_msg = err.stderr.strip() if err.stderr else str(err)
         log_message(f"Compression failed. Error: {error_msg}", "ERROR")
+        return None
 
     except Exception as err:
         log_message(f"Unexpected error during compression: {str(err)}", "ERROR")
+        return None
+
+
+def upload_to_gcs(file_path):
+    """Upload a file to a GCS bucket using native Python client."""
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(GCS_BUCKET_NAME)
+
+        destination_blob_name = f"{GCS_DESTINATION_FOLDER}/{file_path.name}" if GCS_DESTINATION_FOLDER else file_path.name
+        blob = bucket.blob(destination_blob_name)
+
+        blob.upload_from_filename(str(file_path))
+        log_message(f"Successfully uploaded {file_path} to gs://{GCS_BUCKET_NAME}/{destination_blob_name}")
+
+    except Exception as err:
+        log_message(f"GCS upload failed: {str(err)}", "ERROR")
 
 
 if __name__ == "__main__":
     try:
-        if not create_backup():
+        log_message("Starting backup script execution...")
+
+        compressed_backup_path = create_backup()
+
+        if not compressed_backup_path:
             log_message("Backup process completed with errors", "ERROR")
             sys.exit(1)
-        log_message("Backup process completed successfully")
+
+        upload_to_gcs(compressed_backup_path)
+
+        log_message("Backup and upload process completed successfully")
 
     except Exception as e:
         log_message(f"Fatal error in main execution: {str(e)}", "CRITICAL")
