@@ -25,7 +25,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./backend/staticfiles:/tmp/wm_system/static_files
+      - ./backend/staticfiles:/tmp/wm_system/static_files/
     platform: linux/amd64
 
   frontend:
