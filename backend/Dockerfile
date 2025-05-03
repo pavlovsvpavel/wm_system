@@ -67,4 +67,4 @@ RUN chmod +x $APP_HOME/entrypoint.sh && \
 USER ubuntu
 
 ENTRYPOINT ["/home/app/entrypoint.sh"]
-CMD ["gunicorn", "core.wsgi:application", "--bind=0.0.0.0:8000"]
+CMD []

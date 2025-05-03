@@ -20,9 +20,8 @@ services:
     env_file:
       - ./backend/envs/.env.dev
     environment:
-      - GUNICORN_WORKERS=5
+      - GUNICORN_WORKERS=10
       - GUNICORN_RELOAD=true
-      - SKIP_ENTRYPOINT=true
     depends_on:
       - postgres
     volumes:
