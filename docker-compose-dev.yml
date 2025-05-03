@@ -19,15 +19,18 @@ services:
     restart: always
     env_file:
       - ./backend/envs/.env.dev
+    environment:
+      - GUNICORN_WORKERS=5
+      - GUNICORN_RELOAD=true
+      - SKIP_ENTRYPOINT=true
     depends_on:
       - postgres
-    # entrypoint: /entrypoint.sh
     volumes:
       - ./backend/staticfiles:/home/app/backend/static_files
       - ./backend/mediafiles:/home/app/backend/mediafiles
       - ./backend/locale:/home/app/backend/locale
+      - ./backend:/home/app
     platform: linux/amd64
-    command: bash -c "gunicorn core.wsgi:application --bind=0.0.0.0:8000 --workers=$((2 * $(nproc) + 1))"
 
   frontend:
     container_name: wm_app_frontend
@@ -42,6 +45,8 @@ services:
     command: bash -c "npm run docker-build && npm run docker-start"
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/frontend
     
   nginx:
     container_name: wm_app_nginx

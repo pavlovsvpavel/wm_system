@@ -3,46 +3,40 @@ FROM python:3.12.10-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# System setup
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         curl \
         ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Download the latest uv installer
+# Install uv
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
-
-# Run the uv installer then remove it
 RUN sh /uv-installer.sh && rm /uv-installer.sh
-
-# Ensure the installed binary is on the `PATH`
 ENV PATH="/root/.local/bin/:$PATH"
 
-# Create and activate virtual environment
+# Virtual environment
 RUN uv venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
-# Copy dependency files (pyproject.toml and requirements.lock)
 COPY pyproject.toml requirements.lock ./
 
-COPY entrypoint.sh ./
-
-# Install dependencies including psycopg2-binary
+# Install dependencies
 RUN uv pip install -r requirements.lock
 
 # Stage 2: Runtime stage
 FROM python:3.12.10-slim
 
+# Environment setup
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/opt/venv/bin:$PATH"
-ENV APP_HOME=/home/app/backend
+ENV APP_HOME=/home/app
 
-# Install runtime dependencies only (libpq5 for psycopg2)
+# Install only essential runtime dependencies
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     libpq5 \
@@ -56,13 +50,17 @@ COPY --from=builder /opt/venv /opt/venv
 RUN useradd -m ubuntu
 WORKDIR $APP_HOME
 
-# Change ownership of the WORKDIR itself so the 'ubuntu' user can write to it
-RUN chown ubuntu:ubuntu $APP_HOME
+# Copy application code
+COPY . .
 
-# Copy application code with proper ownership
-COPY --chown=ubuntu:ubuntu . .
+# Entrypoint setup
+RUN chmod +x $APP_HOME/entrypoint.sh && \
+    # Verify the script
+    [ -f entrypoint.sh ] && \
+    [ -x entrypoint.sh ] || exit 1
 
-# Switch to non-root user
+# Switch to ubuntu user
 USER ubuntu
 
-RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ["/home/app/entrypoint.sh"]
+CMD ["gunicorn", "core.wsgi:application", "--bind=0.0.0.0:8000"]

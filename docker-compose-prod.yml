@@ -21,13 +21,11 @@ services:
       - ./backend/envs/.env.prod
     depends_on:
       - postgres
-    entrypoint: /entrypoint.sh
     volumes:
       - ./backend/staticfiles:/home/app/backend/static_files
       - ./backend/mediafiles:/home/app/backend/mediafiles
       - ./backend/locale:/home/app/backend/locale
     platform: linux/amd64
-    command: bash -c "gunicorn core.wsgi:application --bind=0.0.0.0:8000 --workers=$((2 * $(nproc) + 1)) --timeout=120"
 
   frontend:
     container_name: wm_app_frontend
