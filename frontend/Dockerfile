@@ -1,7 +1,7 @@
 FROM node:23.5-slim
 
 ENV HOME=/home/app
-ENV APP_HOME=/home/app/frontend
+ENV APP_HOME=/home/app
 
 WORKDIR $APP_HOME
 

@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Deploy to GCP
+      - name: Deploy to VM
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.GCP_INSTANCE_IP }}
@@ -19,6 +19,3 @@ jobs:
                 cd /home/ubuntu/app/wm_system
                 sudo git pull origin main
                 sudo COMPOSE_BAKE=true docker compose -f docker-compose-prod.yml up -d --build
-                sudo docker compose -f docker-compose-prod.yml exec -T backend python manage.py migrate
-                sudo docker compose -f docker-compose-prod.yml exec -T backend python manage.py collectstatic --noinput
-                

@@ -21,6 +21,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
+# Copy dependency files
 COPY pyproject.toml requirements.lock ./
 
 # Install dependencies
@@ -50,8 +51,11 @@ COPY --from=builder /opt/venv /opt/venv
 RUN useradd -m ubuntu
 WORKDIR $APP_HOME
 
+# Change ownership of the WORKDIR itself so the 'ubuntu' user can write to it
+RUN chown ubuntu:ubuntu $APP_HOME
+
 # Copy application code
-COPY . .
+COPY --chown=ubuntu:ubuntu . .
 
 # Entrypoint setup
 RUN chmod +x $APP_HOME/entrypoint.sh && \
