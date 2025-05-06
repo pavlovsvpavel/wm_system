@@ -1,0 +1,11 @@
+project_id          = "wm-system-458510"
+gcp_region          = "europe-west4"
+gcp_zone            = "europe-west4-c"
+ssh_username        = "ubuntu"
+ssh_public_key_path = "~/.ssh/google_private_key.pub"
+instance_name       = "wm-system-test"
+instance_type       = "e2-medium"
+disk_image          = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+disk_size           = 40
+disk_type           = "pd-ssd"
+ssh_agent_identity  = "SHA256:p2b23N3E+vyd5v65zFvcdamZSZE/oZCr5NlLBWOflCI"
