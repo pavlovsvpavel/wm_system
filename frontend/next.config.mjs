@@ -5,15 +5,16 @@ import dotenv from 'dotenv';
 const currentEnv = process.env.ENV || 'local';
 
 const envFileMap = {
-  local: '.env',         // Local testing
-  dev: '.env.dev',       // Local Docker testing
-  prod: '.env.prod',     // Cloud Docker testing
+  local: '.env',         // Local
+  dev: '.env.dev',       // Local Docker
+  prod: '.env.prod',     // Cloud Docker
 };
 
 const envFilePath = path.resolve('./envs', envFileMap[currentEnv]);
 dotenv.config({ path: envFilePath });
 
 const nextConfig = {
+  output: 'standalone',
   env: {
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     ENV: currentEnv,

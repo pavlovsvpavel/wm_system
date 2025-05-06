@@ -32,13 +32,13 @@ services:
     container_name: wm_app_frontend
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile_dev
     ports:
       - "3000:3000"
     restart: on-failure
     env_file:
       - ./frontend/envs/.env.dev
-    command: bash -c "npm run docker-build && npm run docker-start"
+#    command: bash -c "npm run docker-build && npm run docker-start"
     depends_on:
       - backend
     volumes:

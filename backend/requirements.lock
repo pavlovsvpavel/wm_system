@@ -99,6 +99,8 @@ pillow==11.2.1
     # via
     #   wm-system-backend (pyproject.toml)
     #   reportlab
+pip==25.1.1
+    # via wm-system-backend (pyproject.toml)
 psycopg2-binary==2.9.10
     # via wm-system-backend (pyproject.toml)
 pycodestyle==2.13.0
@@ -135,7 +137,7 @@ rpds-py==0.24.0
     #   wm-system-backend (pyproject.toml)
     #   jsonschema
     #   referencing
-setuptools==80.3.0
+setuptools==80.3.1
     # via wm-system-backend (pyproject.toml)
 six==1.17.0
     # via

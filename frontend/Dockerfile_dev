@@ -6,7 +6,7 @@ WORKDIR $HOME/frontend
 COPY ./frontend/package.json ./frontend/package-lock.json* ./
 RUN npm install
 COPY ./frontend .
-RUN npm run build
+RUN npm run docker-build
 
 FROM node:23.5-alpine AS runner
 
