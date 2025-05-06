@@ -1,4 +1,4 @@
-FROM node:23.5-alpine AS builder
+FROM node:23.5-slim AS builder
 ENV HOME=/home/app
 
 WORKDIR $HOME/frontend
@@ -8,7 +8,7 @@ RUN npm install
 COPY ./frontend .
 RUN npm run docker-build
 
-FROM node:23.5-alpine AS runner
+FROM node:23.5-slim AS runner
 
 WORKDIR /home/app/frontend
 COPY --from=builder /home/app/frontend/.next/standalone  ./

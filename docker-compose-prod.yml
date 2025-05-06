@@ -22,7 +22,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./backend/staticfiles:/tmp/wm_system/static_files/
+      - ./backend/staticfiles:/var/www/wm_system/static_files/
     platform: linux/amd64
 
   frontend:
@@ -48,7 +48,7 @@ services:
       - ./nginx/prod/custom_pages/50x.html:/usr/share/nginx/html/50x.html:ro
       - ./nginx/prod/conf.d:/etc/nginx/conf.d/:ro
       - ./nginx/prod/logs:/var/log/nginx
-      - ./backend/staticfiles:/tmp/wm_system/static_files/:ro
+      - ./backend/staticfiles:/var/www/wm_system/static_files/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     ports:

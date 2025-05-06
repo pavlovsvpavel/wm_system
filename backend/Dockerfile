@@ -63,8 +63,5 @@ RUN chmod +x $APP_HOME/entrypoint.sh && \
     [ -f entrypoint.sh ] && \
     [ -x entrypoint.sh ] || exit 1
 
-# Switch to ubuntu user
-USER ubuntu
-
 ENTRYPOINT ["/home/app/entrypoint.sh"]
 CMD []
