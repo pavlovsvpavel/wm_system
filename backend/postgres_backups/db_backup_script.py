@@ -3,15 +3,18 @@ import subprocess
 import datetime
 import sys
 from pathlib import Path
-
+from decouple import Config, RepositoryEnv
 from google.cloud import storage
 
-CONTAINER_NAME = "wm_app_postgres"
-POSTGRES_USER = "postgres"
+env_path = Path(__file__).parent.parent / 'envs' / '.env.prod'
+config = Config(RepositoryEnv(env_path))
+
+CONTAINER_NAME = config("CONTAINER_NAME")
+POSTGRES_USER = config("POSTGRES_USER")
+GCS_BUCKET_NAME = config("GCS_BUCKET_NAME")
+GCS_DESTINATION_FOLDER = config("GCS_DESTINATION_FOLDER")
 BACKUP_DIR = Path(__file__).parent
 LOG_FILE = BACKUP_DIR / "backup.log"
-GCS_BUCKET_NAME = "wm-system-backup"
-GCS_DESTINATION_FOLDER = "postgres"
 
 
 def log_message(message, level="INFO"):
