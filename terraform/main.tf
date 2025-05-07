@@ -98,6 +98,13 @@ resource "google_compute_firewall" "allow_outbound" {
   }
 }
 
+# Use if static IP is present
+data "google_compute_address" "existing_static_ip" {
+  project = var.project_id
+  name    = var.existing_static_ip_name
+  region  = var.gcp_region
+}
+
 resource "google_compute_instance" "instance_creation" {
   name                      = var.instance_name
   machine_type              = var.instance_type
@@ -119,6 +126,8 @@ resource "google_compute_instance" "instance_creation" {
 
     access_config {
       // Ephemeral public IP
+      # use if static IP is present
+      nat_ip = data.google_compute_address.existing_static_ip.address
     }
   }
 

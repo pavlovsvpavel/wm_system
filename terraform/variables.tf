@@ -52,3 +52,8 @@ variable "disk_type" {
   type        = string
   description = "Disk type"
 }
+
+variable "existing_static_ip_name" {
+  type        = string
+  description = "Existing static IP"
+}
