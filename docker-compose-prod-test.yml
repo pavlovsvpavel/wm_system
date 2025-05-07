@@ -13,8 +13,8 @@ services:
   backend:
     container_name: wm_app_backend
     image: ppavlovp/wm-system:backend-prod-test
-    build:
-      context: ./backend
+#    build:
+#      context: ./backend
     ports:
       - "8000:8000"
     restart: always
@@ -29,9 +29,9 @@ services:
   frontend:
     container_name: wm_app_frontend
     image: ppavlovp/wm-system:frontend-prod-test
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile-test
+#    build:
+#      context: .
+#      dockerfile: ./frontend/Dockerfile-test
     ports:
       - "3000:3000"
     restart: always
