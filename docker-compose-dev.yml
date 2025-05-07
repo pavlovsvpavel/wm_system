@@ -30,12 +30,13 @@ services:
 
   frontend:
     container_name: wm_app_frontend
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile_dev
+    image: ppavlovp/wm-system:frontend-dev
+#    build:
+#      context: .
+#      dockerfile: ./frontend/Dockerfile_dev
     ports:
       - "3000:3000"
-    restart: on-failure
+    restart: always
     env_file:
       - ./frontend/envs/.env.dev
 #    command: bash -c "npm run docker-build && npm run docker-start"
@@ -49,7 +50,7 @@ services:
     build:
       context: .
       dockerfile: ./nginx/dev/Dockerfile
-    restart: on-failure
+    restart: always
     volumes:
       - ./nginx/dev/custom_pages/50x.html:/usr/share/nginx/html/50x.html:ro
       - ./nginx/prod/logs:/var/log/nginx
@@ -59,4 +60,5 @@ services:
       - "443:443"
     depends_on:
       - backend
+      - frontend
 

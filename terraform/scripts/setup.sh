@@ -85,8 +85,16 @@ if ! cp -a /home/ubuntu/app/envs/frontend/.env.prod ./frontend/envs/; then
     exit 1
 fi
 
+. /home/ubuntu/app/envs/backend/.env.prod
+
+echo "----- Logging in to Docker -----"
+if ! echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin; then
+    echo "Error: Failed to log in to Docker Hub."
+    exit 1
+fi
+
 echo "----- Building images and running containers -----"
-if ! sudo COMPOSE_BAKE=true docker compose -f docker-compose-prod.yml up -d --build; then
+if ! sudo DOCKER_BUILDKIT=1 COMPOSE_BAKE=true docker compose -f docker-compose-prod.yml up -d --build; then
     echo "Error: Failed to build and run Docker containers."
     exit 1
 fi

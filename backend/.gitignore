@@ -176,3 +176,4 @@ postgres_db
 /.env
 postgres_backups
 /uv.lock
+/.dockerignore

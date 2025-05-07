@@ -16,5 +16,7 @@ COPY --from=builder /home/app/frontend/.next/static  ./.next/static
 COPY --from=builder /home/app/frontend/public ./public
 
 EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "HOSTNAME=0.0.0.0 node server.js"]
+CMD ["node", "server.js"]

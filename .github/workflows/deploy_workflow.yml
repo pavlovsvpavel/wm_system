@@ -18,4 +18,5 @@ jobs:
           script: |
                 cd /home/ubuntu/app/wm_system
                 sudo git pull origin main
-                sudo COMPOSE_BAKE=true docker compose -f docker-compose-prod.yml up -d --build
+                echo "${{ secrets.DOCKERHUB_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+                sudo DOCKER_BUILDKIT=1 COMPOSE_BAKE=true docker compose -f docker-compose-prod.yml up -d --build
