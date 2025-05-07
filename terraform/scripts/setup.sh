@@ -25,7 +25,6 @@ echo "----- Add your user to docker group -----"
 sudo usermod -aG docker "$USER"
 
 echo "----- Installing pip -----"
-sudo apt-get update
 sudo apt-get install -y python3-pip
 
 echo "----- Installing google-cloud-storage -----"
@@ -43,10 +42,9 @@ fi
 echo "----- Navigating to app directory -----"
 cd /home/ubuntu/app
 
-echo "----- Cloning the repository -----"
-REPO_DIR="wm_system"
-REPO_URL="https://$GH_PAT@github.com/pavlovsvpavel/wm_system.git"
+. /home/ubuntu/app/envs/backend/.env.prod
 
+echo "----- Cloning the repository -----"
 [ -d "$REPO_DIR" ] && rm -rf "$REPO_DIR"
 if ! git clone "$REPO_URL"; then
     echo "ERROR: Failed to clone repository"
@@ -85,10 +83,8 @@ if ! cp -a /home/ubuntu/app/envs/frontend/.env.prod ./frontend/envs/; then
     exit 1
 fi
 
-. /home/ubuntu/app/envs/backend/.env.prod
-
 echo "----- Logging in to Docker -----"
-if ! echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin; then
+if ! echo "$DOCKERHUB_PASSWORD" | sudo docker login -u "$DOCKERHUB_USERNAME" --password-stdin; then
     echo "Error: Failed to log in to Docker Hub."
     exit 1
 fi

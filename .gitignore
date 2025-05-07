@@ -171,6 +171,7 @@ static_files
 .terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
+*.tfvars
 *.pem
 postgres_db
 /.env
@@ -202,7 +203,6 @@ ssl/
 
 # misc
 .DS_Store
-*.pem
 
 # debug
 npm-debug.log*
@@ -216,4 +216,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
 
