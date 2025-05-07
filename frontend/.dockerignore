@@ -1,0 +1,46 @@
+# Dependency directories
+node_modules/
+.npm/
+.pnpm/
+.yarn/
+
+# Build output
+.next/
+out/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files (don’t bake secrets into image)
+.env
+.env.*
+envs/
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Test coverage / reports
+coverage/
+*.lcov
+*.lcov-report/
+
+# Git
+.git/
+.gitignore
+
+# Misc
+*.bak
+*.tmp
