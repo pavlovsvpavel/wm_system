@@ -8,6 +8,7 @@ const envFileMap = {
   local: '.env',         // Local
   dev: '.env.dev',       // Local Docker
   prod: '.env.prod',     // Cloud Docker
+  prod_test: '.env.prod-test',
 };
 
 const envFilePath = path.resolve('./envs', envFileMap[currentEnv]);

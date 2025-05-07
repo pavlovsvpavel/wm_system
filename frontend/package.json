@@ -9,6 +9,8 @@
     "docker-dev": "cross-env ENV=dev next dev",
     "docker-build": "cross-env ENV=dev next build",
     "docker-start": "cross-env ENV=dev next start",
+    "build-test": "cross-env ENV=prod_test next build",
+    "start-test": "cross-env ENV=prod_test next start",
     "build": "cross-env ENV=prod next build",
     "start": "cross-env ENV=prod next start",
     "lint": "next lint"
