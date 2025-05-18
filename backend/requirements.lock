@@ -34,7 +34,7 @@ diff-match-patch==20241021
     # via
     #   wm-system-backend (pyproject.toml)
     #   django-import-export
-django==5.2
+django==5.2.1
     # via
     #   wm-system-backend (pyproject.toml)
     #   django-cors-headers
@@ -67,7 +67,7 @@ google-api-core==2.24.2
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.40.0
+google-auth==2.40.1
     # via
     #   google-api-core
     #   google-cloud-core
@@ -106,7 +106,7 @@ jsonschema-specifications==2025.4.1
     # via
     #   wm-system-backend (pyproject.toml)
     #   jsonschema
-numpy==2.2.5
+numpy==2.2.6
     # via
     #   wm-system-backend (pyproject.toml)
     #   pandas
@@ -126,13 +126,17 @@ pip==25.1.1
     # via wm-system-backend (pyproject.toml)
 proto-plus==1.26.1
     # via google-api-core
-protobuf==6.30.2
+protobuf==6.31.0
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psycopg2-binary==2.9.10
+psycopg==3.2.9
     # via wm-system-backend (pyproject.toml)
+psycopg-binary==3.2.9
+    # via psycopg
+psycopg-c==3.2.9
+    # via psycopg
 pyasn1==0.6.1
     # via
     #   pyasn1-modules
@@ -164,21 +168,21 @@ referencing==0.36.2
     #   wm-system-backend (pyproject.toml)
     #   jsonschema
     #   jsonschema-specifications
-reportlab==4.4.0
+reportlab==4.4.1
     # via wm-system-backend (pyproject.toml)
 requests==2.32.3
     # via
     #   wm-system-backend (pyproject.toml)
     #   google-api-core
     #   google-cloud-storage
-rpds-py==0.24.0
+rpds-py==0.25.0
     # via
     #   wm-system-backend (pyproject.toml)
     #   jsonschema
     #   referencing
 rsa==4.9.1
     # via google-auth
-setuptools==80.3.1
+setuptools==80.7.1
     # via wm-system-backend (pyproject.toml)
 six==1.17.0
     # via
@@ -196,6 +200,7 @@ tablib==3.8.0
 typing-extensions==4.13.2
     # via
     #   wm-system-backend (pyproject.toml)
+    #   psycopg
     #   referencing
 tzdata==2025.2
     # via

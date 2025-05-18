@@ -7,8 +7,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         curl \
-        ca-certificates && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+        ca-certificates \
+        build-essential \
+        libpq-dev \
+        gcc \
+        pkg-config \
+        python3-dev \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install uv
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
