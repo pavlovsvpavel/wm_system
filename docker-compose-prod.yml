@@ -22,12 +22,12 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./backend/staticfiles:/var/www/wm_system/static_files/
+      - ./backend/static_files:/var/www/wm_system/static_files/
     platform: linux/amd64
 
   frontend:
     container_name: wm_app_frontend
-    image: ppavlovp/wm-system:frontend-prod
+    image: ppavlovp/private_images:wm-system-prod
 #    build:
 #      context: .
 #      dockerfile: ./frontend/Dockerfile
@@ -49,7 +49,7 @@ services:
       - ./nginx/prod/custom_pages/50x.html:/usr/share/nginx/html/50x.html:ro
       - ./nginx/prod/conf.d:/etc/nginx/conf.d/:ro
       - ./nginx/prod/logs:/var/log/nginx
-      - ./backend/staticfiles:/var/www/wm_system/static_files/:ro
+      - ./backend/static_files:/var/www/wm_system/static_files/:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf/:/etc/nginx/ssl/:ro
     ports:

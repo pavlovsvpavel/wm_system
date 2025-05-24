@@ -2,8 +2,8 @@
 set -e
 
 # Configurable defaults
-WORKERS=${GUNICORN_WORKERS:-$((2 * $(nproc) + 1))}
-TIMEOUT=${GUNICORN_TIMEOUT:-120}
+WORKERS=${GUNICORN_WORKERS:-$((2 * $(nproc)))}
+TIMEOUT=${GUNICORN_TIMEOUT:-30}
 
 # Skip if flag exists
 if [ -n "$SKIP_ENTRYPOINT" ]; then
@@ -13,6 +13,7 @@ fi
 
 # Django setup
 echo "----- Running migrations -----"
+python manage.py makemigrations --no-input
 python manage.py migrate --no-input
 
 echo "----- Collecting static files -----"
