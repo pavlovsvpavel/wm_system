@@ -9,7 +9,7 @@ jobs:
     environment: production
     steps:
       - name: Deploy to VM
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.GCP_INSTANCE_IP }}
           username: ${{ secrets.GCP_USER }}
