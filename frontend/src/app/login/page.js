@@ -140,11 +140,6 @@ export default function LoginScreen() {
             >
                 {isSubmitting ? <div className="spinner"></div> : 'Login'}
             </button>
-
-            <p className="login-register-link">
-                Don't have an account?{" "}
-                <Link href="/register">Register here</Link>
-            </p>
         </div>
     );
 }
